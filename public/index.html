@@ -330,6 +330,8 @@
         <div class="nav-item" data-section="market"><span class="icon">&#9650;</span> Market Analysis</div>
         <div class="nav-label">Sales</div>
         <div class="nav-item" data-section="pipeline"><span class="icon">&#9830;</span> Sales Pipeline</div>
+        <div class="nav-label">Data</div>
+        <div class="nav-item" data-section="upload"><span class="icon">&#8682;</span> Import / Export</div>
       </div>
       <div class="sidebar-footer">
         <p>PropConsult Pro v1.0</p>
@@ -452,6 +454,91 @@
         </div>
         <div class="content">
           <div class="pipeline" id="pipeline-board"></div>
+        </div>
+      </div>
+
+      <!-- IMPORT / EXPORT -->
+      <div class="section" id="sec-upload">
+        <div class="topbar">
+          <div><h2>Import / Export Data</h2><span class="subtitle">Upload CSV files from your computer or export existing data</span></div>
+        </div>
+        <div class="content">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><h3>&#8682; Upload CSV</h3></div>
+              <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">Upload a CSV file from your computer. First row must be column headers.</p>
+              
+              <div class="form-group">
+                <label>Data Type</label>
+                <select id="upload-table">
+                  <option value="leads">Leads</option>
+                  <option value="contacts">Contacts</option>
+                  <option value="properties">Properties</option>
+                  <option value="deals">Deals</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>Select CSV File</label>
+                <input type="file" id="csv-file" accept=".csv,.txt" style="padding:10px;background:var(--gray-50);border:2px dashed var(--gray-300);border-radius:8px;width:100%;cursor:pointer;">
+              </div>
+              
+              <div id="csv-preview" style="margin:16px 0;display:none;">
+                <label style="font-size:12px;font-weight:600;color:var(--gray-600);">Preview (first 3 rows):</label>
+                <div id="csv-preview-content" style="margin-top:8px;max-height:200px;overflow:auto;font-size:12px;background:var(--gray-50);padding:12px;border-radius:8px;border:1px solid var(--gray-200);"></div>
+              </div>
+              
+              <button class="btn btn-primary btn-lg" onclick="uploadCSV()" style="width:100%;">Upload & Import</button>
+              
+              <div id="upload-result" style="margin-top:16px;"></div>
+              
+              <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--gray-200);">
+                <h4 style="font-size:13px;margin-bottom:8px;">Expected CSV Columns:</h4>
+                <div id="column-help" style="font-size:12px;color:var(--gray-500);"></div>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-header"><h3>&#8681; Export Data</h3></div>
+              <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">Download your data as CSV to use in Excel, Google Sheets, or any tool.</p>
+              
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <button class="btn btn-ghost" onclick="exportData('leads')" style="justify-content:space-between;width:100;">&#10038; Export Leads <span style="color:var(--gray-400);">&#8594;</span></button>
+                <button class="btn btn-ghost" onclick="exportData('contacts')" style="justify-content:space-between;width:100;">&#9733; Export Contacts <span style="color:var(--gray-400);">&#8594;</span></button>
+                <button class="btn btn-ghost" onclick="exportData('properties')" style="justify-content:space-between;width:100;">&#127968; Export Properties <span style="color:var(--gray-400);">&#8594;</span></button>
+                <button class="btn btn-ghost" onclick="exportData('deals')" style="justify-content:space-between;width:100;">&#9830; Export Deals <span style="color:var(--gray-400);">&#8594;</span></button>
+              </div>
+              
+              <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--gray-200);">
+                <div class="card-header"><h3 style="color:var(--danger);">&#9888; Clear Data</h3></div>
+                <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">Remove all records from a table (cannot be undone).</p>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                  <button class="btn btn-sm btn-danger" onclick="clearTable('leads')">Clear Leads</button>
+                  <button class="btn btn-sm btn-danger" onclick="clearTable('contacts')">Clear Contacts</button>
+                  <button class="btn btn-sm btn-danger" onclick="clearTable('properties')">Clear Properties</button>
+                  <button class="btn btn-sm btn-danger" onclick="clearTable('deals')">Clear Deals</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card" style="margin-top:20px;">
+            <div class="card-header"><h3>&#128218; CSV Format Guide</h3></div>
+            <div class="grid-2" style="gap:24px;">
+              <div>
+                <h4 style="font-size:13px;margin-bottom:8px;color:var(--primary);">Leads CSV</h4>
+                <pre style="font-size:11px;background:var(--gray-50);padding:12px;border-radius:8px;overflow-x:auto;border:1px solid var(--gray-200);">name,email,phone,source,budget,property_interest,notes
+Rajesh Sharma,rajesh@email.com,+91-9876543210,referral,4500000,Residential,Looking in Pallavpuram
+Priya Agarwal,priya@email.com,+91-9812345678,website,12000000,Commercial,Begumpul area</pre>
+              </div>
+              <div>
+                <h4 style="font-size:13px;margin-bottom:8px;color:var(--primary);">Properties CSV</h4>
+                <pre style="font-size:11px;background:var(--gray-50);padding:12px;border-radius:8px;overflow-x:auto;border:1px solid var(--gray-200);">title,type,location,price,size_sqft,bedrooms,roi_estimate,market_trend
+3BHK Flat,residential,Pallavpuram Meerut,4500000,1450,3,7.5,rising
+Office Space,commercial,Begumpul Meerut,18000000,6000,,9.8,rising</pre>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -812,6 +899,118 @@
     async function seedData() {
       await api('/api/seed', { method: 'POST' });
       toast('Demo data loaded successfully!'); loadDashboard();
+    }
+
+    // UPLOAD / EXPORT
+    const columnHelp = {
+      leads: 'name, email, phone, source (website/referral/social_media/cold_call), budget, property_interest, notes',
+      contacts: 'name, email, phone, company, role, stage (prospect/qualification/proposal/negotiation), deal_value',
+      properties: 'title, type (residential/commercial), location, price, size_sqft, bedrooms, roi_estimate, market_trend (rising/stable/declining)',
+      deals: 'title, value, stage (qualification/proposal/negotiation/closed_won), probability, contact_id, property_id'
+    };
+
+    document.getElementById('upload-table').addEventListener('change', function() {
+      document.getElementById('column-help').textContent = columnHelp[this.value];
+    });
+    document.getElementById('column-help').textContent = columnHelp.leads;
+
+    // CSV file preview
+    document.getElementById('csv-file').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const lines = ev.target.result.split('\n').filter(l => l.trim());
+        const preview = lines.slice(0, 4).map(l => `<div style="padding:4px 0;border-bottom:1px solid var(--gray-200);font-family:monospace;">${l}</div>`).join('');
+        document.getElementById('csv-preview-content').innerHTML = `<div style="font-weight:600;color:var(--primary);margin-bottom:4px;">${lines.length - 1} data rows detected</div>${preview}`;
+        document.getElementById('csv-preview').style.display = 'block';
+      };
+      reader.readAsText(file);
+    });
+
+    function parseCSV(text) {
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
+      const data = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = [];
+        let current = '', inQuotes = false;
+        for (const char of lines[i]) {
+          if (char === '"') { inQuotes = !inQuotes; }
+          else if (char === ',' && !inQuotes) { values.push(current.trim()); current = ''; }
+          else { current += char; }
+        }
+        values.push(current.trim());
+        if (values.length >= headers.length - 1) {
+          const row = {};
+          headers.forEach((h, idx) => { if (values[idx] && values[idx] !== '') row[h] = values[idx]; });
+          if (Object.keys(row).length > 0) data.push(row);
+        }
+      }
+      return data;
+    }
+
+    async function uploadCSV() {
+      const file = document.getElementById('csv-file').files[0];
+      const table = document.getElementById('upload-table').value;
+      if (!file) { toast('Please select a CSV file'); return; }
+
+      const text = await file.text();
+      const data = parseCSV(text);
+      if (data.length === 0) { toast('No valid data found in CSV'); return; }
+
+      const result = await api('/api/upload', {
+        method: 'POST',
+        body: JSON.stringify({ table, data })
+      });
+
+      if (result.success) {
+        document.getElementById('upload-result').innerHTML = `
+          <div style="background:var(--success-light);border:1px solid #a7f3d0;border-radius:8px;padding:14px;">
+            <span style="font-weight:700;color:var(--success);">&#10003; Success!</span>
+            <span style="color:var(--gray-600);"> ${result.message}</span>
+          </div>`;
+        toast(result.message);
+      } else {
+        document.getElementById('upload-result').innerHTML = `
+          <div style="background:var(--danger-light);border:1px solid #fca5a5;border-radius:8px;padding:14px;">
+            <span style="font-weight:700;color:var(--danger);">Error:</span> ${result.error}
+          </div>`;
+      }
+    }
+
+    async function exportData(table) {
+      const data = await api(`/api/export?table=${table}`);
+      if (!data.length) { toast(`No ${table} data to export`); return; }
+
+      // Remove internal fields
+      const clean = data.map(row => {
+        const r = { ...row };
+        delete r.id; delete r.created_at; delete r.updated_at;
+        return r;
+      });
+      const headers = Object.keys(clean[0]);
+      const csv = [
+        headers.join(','),
+        ...clean.map(row => headers.map(h => {
+          const val = row[h] ?? '';
+          return String(val).includes(',') ? `"${val}"` : val;
+        }).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${table}_export_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click(); URL.revokeObjectURL(url);
+      toast(`Exported ${data.length} ${table} records`);
+    }
+
+    async function clearTable(table) {
+      if (!confirm(`Are you sure you want to delete ALL ${table}? This cannot be undone.`)) return;
+      const result = await api('/api/clear', { method: 'POST', body: JSON.stringify({ table }) });
+      toast(result.message);
     }
 
     // Initial load

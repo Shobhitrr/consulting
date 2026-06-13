@@ -111,6 +111,57 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, { message: 'Sample data seeded successfully' });
   }
 
+  // CSV Upload
+  if (pathname === '/api/upload' && method === 'POST') {
+    const { table, data } = body;
+    if (!table || !data || !Array.isArray(data)) {
+      return sendJson(res, { error: 'Provide table and data array' }, 400);
+    }
+    const allowed = ['leads', 'contacts', 'properties', 'deals'];
+    if (!allowed.includes(table)) return sendJson(res, { error: 'Invalid table' }, 400);
+    let inserted = 0;
+    data.forEach(row => {
+      if (row && typeof row === 'object' && Object.keys(row).length > 0) {
+        // Auto-score leads
+        if (table === 'leads' && !row.score) {
+          let score = 0;
+          if (row.email) score += 20;
+          if (row.phone) score += 20;
+          if (row.budget) { const b = parseInt(row.budget); if (b > 10000000) score += 30; else if (b > 5000000) score += 20; else score += 10; }
+          if (row.property_interest) score += 15;
+          if (row.source === 'referral') score += 15; else if (row.source === 'website') score += 10;
+          row.score = Math.min(score, 100);
+        }
+        if (table === 'leads') row.status = row.status || 'new';
+        if (table === 'contacts') { row.stage = row.stage || 'prospect'; row.deal_value = row.deal_value || 0; }
+        if (table === 'properties') { row.status = row.status || 'available'; }
+        if (table === 'deals') { row.stage = row.stage || 'qualification'; row.probability = row.probability || 10; }
+        db.insert(table, row);
+        inserted++;
+      }
+    });
+    return sendJson(res, { success: true, inserted, message: `Uploaded ${inserted} records to ${table}` });
+  }
+
+  // Export data as JSON
+  if (pathname === '/api/export' && method === 'GET') {
+    const table = query.table;
+    const allowed = ['leads', 'contacts', 'properties', 'deals', 'activities'];
+    if (!table || !allowed.includes(table)) return sendJson(res, { error: 'Provide valid table param' }, 400);
+    return sendJson(res, db.findAll(table));
+  }
+
+  // Clear specific table
+  if (pathname === '/api/clear' && method === 'POST') {
+    const { table } = body;
+    const allowed = ['leads', 'contacts', 'properties', 'deals', 'activities'];
+    if (!table || !allowed.includes(table)) return sendJson(res, { error: 'Invalid table' }, 400);
+    const data = db.load();
+    data[table] = [];
+    db.save(data);
+    return sendJson(res, { success: true, message: `Cleared all ${table}` });
+  }
+
   // Static files
   let filePath = path.join(__dirname, 'public', pathname === '/' ? 'index.html' : pathname);
   if (!fs.existsSync(filePath)) filePath = path.join(__dirname, 'public', 'index.html');
