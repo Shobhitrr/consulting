@@ -1,0 +1,10 @@
+{
+  "name": "real-estate-consulting",
+  "version": "1.0.0",
+  "description": "Real Estate Consulting Platform - CRM, Lead Gen, AI Follow-up, Market Analysis",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
