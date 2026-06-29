@@ -260,7 +260,7 @@ body{font-family:'Inter',sans-serif;color:var(--dark);overflow-x:hidden;}
 
 <!-- PRODUCTS -->
 <div class="section" id="sec-products">
-<div class="topbar"><div><h2>Products</h2><span class="sub">Your catalogue</span></div><div class="topbar-actions"><button class="btn btn-ghost" id="bulk-broadcast-btn" style="display:none;" onclick="bulkBroadcast()">📢 Broadcast</button><button class="btn btn-primary" onclick="showModal('product')">+ Add Product</button></div></div>
+<div class="topbar"><div><h2>Products</h2><span class="sub">Your catalogue</span></div><div class="topbar-actions"><button class="btn btn-ghost" id="bulk-broadcast-btn" style="display:none;" onclick="bulkBroadcast()">📢 Broadcast</button><button class="btn btn-ghost" onclick="showCSVImport()">📄 CSV Import</button><button class="btn btn-primary" onclick="showModal('product')">+ Add Product</button></div></div>
 <div class="content">
 <div class="search-bar"><input class="search-input" id="product-search" placeholder="Search products..." oninput="searchProducts()"><select class="filter-chip" id="product-cat-filter" onchange="searchProducts()"><option value="">All Categories</option></select></div>
 <div class="product-grid" id="product-grid"></div>
@@ -368,7 +368,15 @@ body{font-family:'Inter',sans-serif;color:var(--dark);overflow-x:hidden;}
 <div class="content"><div class="card"><div class="card-header"><h3>Business Details</h3></div>
 <div class="form-row"><div class="form-group"><label>Business Name</label><input id="s-name" placeholder="Your Store"></div><div class="form-group"><label>Phone</label><input id="s-phone" placeholder="+91-"></div></div>
 <div class="form-row"><div class="form-group"><label>WhatsApp</label><input id="s-whatsapp" placeholder="+91-"></div><div class="form-group"><label>Instagram</label><input id="s-instagram" placeholder="@handle"></div></div>
-<button class="btn btn-primary" onclick="saveSettings()">Save</button></div></div></div>
+<button class="btn btn-primary" onclick="saveSettings()">Save</button></div>
+<div class="card" style="margin-top:18px;"><div class="card-header"><h3>💾 Data Backup & Restore</h3></div>
+<p style="font-size:13px;color:var(--gray-500);margin-bottom:14px;">Download your complete data as a backup file. Restore anytime if data is lost.</p>
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+<button class="btn btn-primary" onclick="downloadBackup()">⬇️ Download Backup</button>
+<button class="btn btn-ghost" onclick="showRestore()">🔄 Restore from Backup</button>
+</div>
+<p style="font-size:11px;color:var(--gray-400);margin-top:10px;">💡 Tip: Download a backup regularly. Render free tier may reset data after inactivity.</p>
+</div></div></div>
 
 </div></div>
 <!-- Mobile Nav -->
@@ -411,7 +419,7 @@ document.getElementById('recent-broadcasts').innerHTML=d.recent_broadcasts.lengt
 async function loadProducts(){const cats=await api('/api/categories');document.getElementById('product-cat-filter').innerHTML='<option value="">All</option>'+cats.map(c=>`<option>${c.name}</option>`).join('');searchProducts();}
 async function searchProducts(){const s=document.getElementById('product-search').value,c=document.getElementById('product-cat-filter').value;let u='/api/products?';if(s)u+=`search=${encodeURIComponent(s)}&`;if(c)u+=`category=${encodeURIComponent(c)}&`;allProducts=await api(u);renderProducts();}
 function renderProducts(){const g=document.getElementById('product-grid');if(!allProducts.length){g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--gray-400);"><p style="font-size:48px;">💍</p><p>No products. Add your first!</p></div>';return;}
-g.innerHTML=allProducts.map(p=>{const e=getCategoryEmoji(p.category),low=p.stock<=5,sel=selectedProducts.has(p.id);return`<div class="product-card"><div class="select-check ${sel?'checked':''}" onclick="event.stopPropagation();toggleSelect(${p.id})">${sel?'✓':''}</div><div class="img-wrap">${e}${low?'<div class="stock-badge low">Stock: '+p.stock+'</div>':'<div class="stock-badge">'+p.stock+'</div>'}</div><div class="info"><div class="cat">${p.category||''}</div><div class="name">${p.name}</div><div class="prices"><span class="price-wholesale">₹${p.wholesale_price}</span><span class="price-retail">₹${p.retail_price}</span></div></div><div class="actions-bar"><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();genWA(${p.id})">📱</button><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();genIG(${p.id})">📸</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();delProduct(${p.id})">🗑</button></div></div>`;}).join('');
+g.innerHTML=allProducts.map(p=>{const e=p.images&&p.images.length?`<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">`:getCategoryEmoji(p.category),low=p.stock<=5,sel=selectedProducts.has(p.id);return`<div class="product-card"><div class="select-check ${sel?'checked':''}" onclick="event.stopPropagation();toggleSelect(${p.id})">${sel?'✓':''}</div><div class="img-wrap">${e}${low?'<div class="stock-badge low">Stock: '+p.stock+'</div>':'<div class="stock-badge">'+p.stock+'</div>'}</div><div class="info"><div class="cat">${p.category||''}</div><div class="name">${p.name}</div><div class="prices"><span class="price-wholesale">₹${p.wholesale_price}</span><span class="price-retail">₹${p.retail_price}</span></div></div><div class="actions-bar"><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();editProduct(${p.id})" title="Edit">✏️</button><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();sendWhatsApp(${p.id})" title="WhatsApp Direct">📱</button><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();genIG(${p.id})" title="Instagram">📸</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();delProduct(${p.id})" title="Delete">🗑</button></div></div>`;}).join('');
 document.getElementById('bulk-broadcast-btn').style.display=selectedProducts.size>0?'inline-flex':'none';}
 function toggleSelect(id){selectedProducts.has(id)?selectedProducts.delete(id):selectedProducts.add(id);renderProducts();}
 function getCategoryEmoji(c){const m={'Necklaces':'📿','Earrings':'✨','Bangles':'⭕','Bracelets':'💫','Rings':'💍','Mangalsutra':'🪷','Cosmetics':'💄','Lipsticks':'💋','Foundations':'🧴','Skin Care':'🧖','Hair Care':'💇'};return m[c]||'💎';}
@@ -469,5 +477,194 @@ async function submitProduct(){const n=document.getElementById('f-name').value;i
 async function submitCat(){await api('/api/categories',{method:'POST',body:JSON.stringify({name:document.getElementById('f-cat-name').value,icon:document.getElementById('f-cat-icon').value||'📦'})});closeModal();toast('Added!');loadCategories();}
 async function submitCust(){await api('/api/customers',{method:'POST',body:JSON.stringify({name:document.getElementById('f-cust-name').value,phone:document.getElementById('f-cust-phone').value,city:document.getElementById('f-cust-city').value,type:document.getElementById('f-cust-type').value})});closeModal();toast('Added!');loadCustomers();}
 async function seedData(){await api('/api/seed',{method:'POST'});toast('Demo loaded!');loadDashboard();}
+
+// === FEATURE 1: IMAGE UPLOAD ===
+async function uploadImage(productId) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment'; // camera on mobile
+  input.multiple = true;
+  input.onchange = async (e) => {
+    const files = e.target.files;
+    if (!files.length) return;
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success && data.files.length) {
+        const product = await api(`/api/products/${productId}`);
+        const images = product.images || [];
+        images.push(data.files[0].url);
+        await api(`/api/products/${productId}`, { method: 'PATCH', body: JSON.stringify({ images }) });
+      }
+    }
+    toast('Image uploaded!');
+    searchProducts();
+  };
+  input.click();
+}
+
+// === FEATURE 2: EDIT PRODUCT ===
+async function editProduct(id) {
+  const p = await api(`/api/products/${id}`);
+  if (!p || p.error) { toast('Product not found'); return; }
+  const cats = ['Necklaces','Earrings','Bangles','Bracelets','Rings','Mangalsutra','Cosmetics','Lipsticks','Foundations','Skin Care','Hair Care'];
+  document.getElementById('modal-content').innerHTML = `<h3>Edit Product</h3>
+    <div class="form-group"><label>Name</label><input id="e-name" value="${p.name||''}"></div>
+    <div class="form-row"><div class="form-group"><label>Category</label><select id="e-category">${cats.map(c=>`<option ${c===p.category?'selected':''}>${c}</option>`).join('')}</select></div><div class="form-group"><label>SKU</label><input id="e-sku" value="${p.sku||''}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Wholesale ₹</label><input id="e-wprice" type="number" value="${p.wholesale_price||''}"></div><div class="form-group"><label>Retail ₹</label><input id="e-rprice" type="number" value="${p.retail_price||''}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Stock</label><input id="e-stock" type="number" value="${p.stock||0}"></div><div class="form-group"><label>Material</label><input id="e-material" value="${p.material||''}"></div></div>
+    <div class="form-row"><div class="form-group"><label>Color</label><input id="e-color" value="${p.color||''}"></div><div class="form-group"><label>Weight</label><input id="e-weight" value="${p.weight||''}"></div></div>
+    <div class="form-group"><label>Tags</label><input id="e-tags" value="${p.tags||''}"></div>
+    <div class="form-group"><label>Images</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">${(p.images||[]).map((img,i)=>`<div style="position:relative;width:60px;height:60px;border-radius:8px;overflow:hidden;border:1px solid var(--gray-200);"><img src="${img}" style="width:100%;height:100%;object-fit:cover;"><button style="position:absolute;top:2px;right:2px;background:red;color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;" onclick="removeImage(${id},${i})">×</button></div>`).join('')}</div>
+      <button class="btn btn-sm btn-ghost" onclick="uploadImage(${id})">📷 Add Image</button>
+    </div>
+    <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveEdit(${id})">Save Changes</button></div>`;
+  document.getElementById('modal').classList.add('show');
+}
+async function saveEdit(id) {
+  await api(`/api/products/${id}`, { method: 'PATCH', body: JSON.stringify({
+    name: document.getElementById('e-name').value,
+    category: document.getElementById('e-category').value,
+    sku: document.getElementById('e-sku').value,
+    wholesale_price: parseFloat(document.getElementById('e-wprice').value) || 0,
+    retail_price: parseFloat(document.getElementById('e-rprice').value) || 0,
+    stock: parseInt(document.getElementById('e-stock').value) || 0,
+    material: document.getElementById('e-material').value,
+    color: document.getElementById('e-color').value,
+    weight: document.getElementById('e-weight').value,
+    tags: document.getElementById('e-tags').value
+  })});
+  closeModal(); toast('Product updated!'); searchProducts();
+}
+async function removeImage(productId, imageIndex) {
+  const p = await api(`/api/products/${productId}`);
+  const images = (p.images || []).filter((_, i) => i !== imageIndex);
+  await api(`/api/products/${productId}`, { method: 'PATCH', body: JSON.stringify({ images }) });
+  editProduct(productId); // refresh modal
+}
+
+// === FEATURE 3: WHATSAPP DIRECT LINK ===
+async function sendWhatsApp(id) {
+  const r = await api('/api/broadcasts/generate-whatsapp', { method: 'POST', body: JSON.stringify({ product_ids: [id] }) });
+  const text = encodeURIComponent(r.caption);
+  // Show modal with copy + direct send options
+  document.getElementById('modal-content').innerHTML = `<h3>📱 Send via WhatsApp</h3>
+    <div class="ai-result"><pre>${r.caption}</pre></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+      <a href="https://wa.me/?text=${text}" target="_blank" class="btn btn-primary" style="text-decoration:none;">Open WhatsApp →</a>
+      <button class="btn btn-ghost" onclick="navigator.clipboard.writeText(document.querySelector('#modal-content pre').textContent);toast('Copied!')">📋 Copy Text</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    </div>
+    <p style="font-size:11px;color:var(--gray-400);margin-top:12px;">Tip: On mobile, this opens WhatsApp directly. On desktop, it opens WhatsApp Web.</p>`;
+  document.getElementById('modal').classList.add('show');
+}
+
+// === FEATURE 4: CSV BULK IMPORT ===
+function showCSVImport() {
+  document.getElementById('modal-content').innerHTML = `<h3>📄 Bulk Import (CSV)</h3>
+    <p style="font-size:13px;color:var(--gray-500);margin-bottom:14px;">Upload a CSV file with your products. First row must be headers.</p>
+    <div style="border:2px dashed var(--gray-300);border-radius:12px;padding:30px;text-align:center;cursor:pointer;background:var(--gray-50);" onclick="document.getElementById('csv-input').click()">
+      <p style="font-size:28px;margin-bottom:8px;">📁</p>
+      <p style="font-size:13px;color:var(--gray-500);">Click to select CSV file</p>
+      <p style="font-size:11px;color:var(--gray-400);margin-top:4px;">Or drag & drop</p>
+    </div>
+    <input type="file" id="csv-input" accept=".csv" style="display:none;" onchange="previewCSV(this)">
+    <div id="csv-preview-area" style="margin-top:14px;"></div>
+    <div style="margin-top:16px;padding:14px;background:var(--gray-50);border-radius:10px;border:1px solid var(--gray-200);">
+      <p style="font-size:11px;font-weight:700;color:var(--gray-600);margin-bottom:6px;">Required CSV columns:</p>
+      <code style="font-size:11px;color:var(--gray-500);">name, category, wholesale_price, retail_price, stock</code>
+      <p style="font-size:11px;color:var(--gray-400);margin-top:4px;">Optional: material, color, weight, tags, sku</p>
+    </div>
+    <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" id="csv-upload-btn" style="display:none;" onclick="doCSVImport()">Import Products</button></div>`;
+  document.getElementById('modal').classList.add('show');
+}
+let csvData = [];
+function previewCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const lines = e.target.result.split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length < 2) { toast('CSV needs headers + data'); return; }
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
+    csvData = [];
+    for (let i = 1; i < lines.length; i++) {
+      const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+      const row = {};
+      headers.forEach((h, idx) => { if (vals[idx]) row[h] = vals[idx]; });
+      if (row.name) csvData.push(row);
+    }
+    document.getElementById('csv-preview-area').innerHTML = `<div style="background:var(--success-light);border:1px solid rgba(0,128,96,0.2);border-radius:8px;padding:12px;"><strong style="color:var(--success);">${csvData.length} products</strong> found in CSV</div>`;
+    document.getElementById('csv-upload-btn').style.display = 'inline-flex';
+  };
+  reader.readAsText(file);
+}
+async function doCSVImport() {
+  if (!csvData.length) { toast('No data'); return; }
+  const r = await api('/api/products/bulk', { method: 'POST', body: JSON.stringify({ products: csvData }) });
+  closeModal();
+  toast(`Imported ${r.inserted} products!`);
+  searchProducts();
+}
+
+// === FEATURE 5: BACKUP & RESTORE ===
+async function downloadBackup() {
+  const data = {};
+  data.products = await api('/api/products');
+  data.categories = await api('/api/categories');
+  data.customers = await api('/api/customers');
+  data.broadcasts = await api('/api/broadcasts');
+  data.settings = await api('/api/settings');
+  data.exported_at = new Date().toISOString();
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `glamstore_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Backup downloaded!');
+}
+function showRestore() {
+  document.getElementById('modal-content').innerHTML = `<h3>🔄 Restore Backup</h3>
+    <p style="font-size:13px;color:var(--gray-500);margin-bottom:14px;">Upload a previously downloaded backup file to restore all your data.</p>
+    <p style="font-size:12px;color:var(--danger);margin-bottom:14px;">⚠️ This will replace ALL current data.</p>
+    <div style="border:2px dashed var(--gray-300);border-radius:12px;padding:30px;text-align:center;cursor:pointer;background:var(--gray-50);" onclick="document.getElementById('restore-input').click()">
+      <p style="font-size:28px;margin-bottom:8px;">📦</p>
+      <p style="font-size:13px;">Select backup .json file</p>
+    </div>
+    <input type="file" id="restore-input" accept=".json" style="display:none;" onchange="doRestore(this)">
+    <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button></div>`;
+  document.getElementById('modal').classList.add('show');
+}
+async function doRestore(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const text = await file.text();
+  try {
+    const data = JSON.parse(text);
+    if (!data.products) { toast('Invalid backup file'); return; }
+    // Clear and re-import
+    await api('/api/seed', { method: 'POST' }); // reset
+    // Now bulk import products
+    if (data.products.length) {
+      await api('/api/products/bulk', { method: 'POST', body: JSON.stringify({ products: data.products }) });
+    }
+    if (data.customers) {
+      for (const c of data.customers) { await api('/api/customers', { method: 'POST', body: JSON.stringify(c) }); }
+    }
+    if (data.settings) {
+      await api('/api/settings', { method: 'PATCH', body: JSON.stringify(data.settings) });
+    }
+    closeModal();
+    toast(`Restored! ${data.products.length} products loaded`);
+    loadDashboard();
+  } catch (e) { toast('Error reading backup file'); }
+}
 </script>
 </body></html>
