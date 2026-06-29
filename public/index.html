@@ -1,533 +1,473 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GlamStore - Wholesale Catalogue & Broadcast</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --primary: #7c3aed; --primary-dark: #6d28d9; --primary-light: #f5f3ff;
-      --accent: #ec4899; --accent-light: #fdf2f8;
-      --gold: #d97706; --gold-light: #fffbeb;
-      --success: #10b981; --success-light: #ecfdf5;
-      --warning: #f59e0b; --danger: #ef4444;
-      --dark: #0f0a1e; --dark-2: #1a1333; --dark-3: #2d2250;
-      --gray-50: #faf9fc; --gray-100: #f3f1f9; --gray-200: #e8e5f0;
-      --gray-300: #d4d0e0; --gray-400: #9f99b2; --gray-500: #6e6885;
-      --gray-600: #4a4560; --gray-700: #2d2845; --gray-800: #1a1630;
-      --radius: 14px; --radius-lg: 20px; --radius-xl: 24px;
-      --shadow: 0 4px 20px rgba(124,58,237,0.08);
-      --shadow-lg: 0 12px 40px rgba(124,58,237,0.12);
-      --glass: rgba(255,255,255,0.7); --glass-border: rgba(255,255,255,0.3);
-    }
-
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #faf9fc 0%, #f3f0ff 50%, #fdf2f8 100%); color: var(--dark); min-height: 100vh; }
-    .app { display: flex; min-height: 100vh; }
-
-    /* Sidebar */
-    .sidebar {
-      width: 72px; background: var(--dark); position: fixed; height: 100vh;
-      display: flex; flex-direction: column; align-items: center; z-index: 100;
-      padding: 16px 0; transition: width 0.3s ease;
-    }
-    .sidebar:hover { width: 220px; }
-    .sidebar .logo { width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 24px; flex-shrink: 0; }
-    .nav { flex: 1; width: 100%; padding: 0 10px; overflow: hidden; }
-    .nav-item { width: 100%; padding: 12px; cursor: pointer; display: flex; align-items: center; gap: 14px; border-radius: 12px; margin-bottom: 4px; transition: all 0.2s; color: var(--gray-400); position: relative; overflow: hidden; }
-    .nav-item:hover { background: rgba(124,58,237,0.1); color: #fff; }
-    .nav-item.active { background: rgba(124,58,237,0.2); color: #fff; }
-    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 24px; background: var(--accent); border-radius: 0 4px 4px 0; }
-    .nav-item .icon { font-size: 20px; min-width: 20px; text-align: center; }
-    .nav-item .label { font-size: 13px; font-weight: 500; white-space: nowrap; opacity: 0; transition: opacity 0.2s; }
-    .sidebar:hover .nav-item .label { opacity: 1; }
-
-    /* Main */
-    .main { margin-left: 72px; flex: 1; min-height: 100vh; }
-    .topbar { position: sticky; top: 0; z-index: 50; background: rgba(250,249,252,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--gray-200); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
-    .topbar h2 { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .topbar .sub { font-size: 12px; color: var(--gray-500); font-weight: 400; -webkit-text-fill-color: var(--gray-500); }
-    .topbar-actions { display: flex; gap: 8px; }
-    .content { padding: 24px 28px; max-width: 1400px; }
-
-    /* Buttons */
-    .btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-    .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
-    .btn:active { transform: scale(0.97); }
-    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-ghost { background: var(--glass); border: 1px solid var(--gray-200); color: var(--gray-600); backdrop-filter: blur(8px); }
-    .btn-ghost:hover { background: #fff; }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; }
-    .btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 12px; }
-
-    /* Glass Card */
-    .card { background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 18px; transition: all 0.3s; }
-    .card:hover { box-shadow: var(--shadow); border-color: rgba(124,58,237,0.15); }
-    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .card-header h3 { font-size: 15px; font-weight: 700; }
-
-    /* Stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 20px; transition: all 0.3s; position: relative; overflow: hidden; }
-    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-    .stat-card .stat-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
-    .stat-card .stat-label { font-size: 11px; color: var(--gray-500); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-card .stat-value { font-size: 26px; font-weight: 900; margin: 4px 0; }
-    .stat-card .stat-sub { font-size: 11px; color: var(--gray-400); }
-    .stat-card::after { content: ''; position: absolute; top: -30px; right: -30px; width: 80px; height: 80px; border-radius: 50%; opacity: 0.08; }
-    .stat-card.purple .stat-icon { background: var(--primary-light); color: var(--primary); }
-    .stat-card.purple::after { background: var(--primary); }
-    .stat-card.pink .stat-icon { background: var(--accent-light); color: var(--accent); }
-    .stat-card.pink::after { background: var(--accent); }
-    .stat-card.gold .stat-icon { background: var(--gold-light); color: var(--gold); }
-    .stat-card.gold::after { background: var(--gold); }
-    .stat-card.green .stat-icon { background: var(--success-light); color: var(--success); }
-    .stat-card.green::after { background: var(--success); }
-
-    /* Product Grid - Instagram style */
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
-    .product-card { background: #fff; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--gray-200); transition: all 0.3s; cursor: pointer; position: relative; }
-    .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
-    .product-card .img-wrap { width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--gray-100), var(--primary-light)); display: flex; align-items: center; justify-content: center; font-size: 48px; position: relative; overflow: hidden; }
-    .product-card .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .product-card .img-wrap .stock-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; backdrop-filter: blur(4px); }
-    .product-card .img-wrap .stock-badge.low { background: rgba(239,68,68,0.9); }
-    .product-card .info { padding: 14px; }
-    .product-card .info .cat { font-size: 10px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .product-card .info .name { font-size: 14px; font-weight: 700; margin: 4px 0; color: var(--dark); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .product-card .info .prices { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-    .product-card .info .price-wholesale { font-size: 16px; font-weight: 800; color: var(--primary); }
-    .product-card .info .price-retail { font-size: 12px; color: var(--gray-400); text-decoration: line-through; }
-    .product-card .actions-bar { display: flex; gap: 6px; padding: 0 14px 14px; }
-    .product-card .actions-bar .btn { flex: 1; justify-content: center; font-size: 11px; padding: 7px; }
-    .product-card .select-check { position: absolute; top: 10px; left: 10px; width: 24px; height: 24px; border-radius: 8px; background: rgba(255,255,255,0.9); border: 2px solid var(--gray-300); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; z-index: 2; }
-    .product-card .select-check.checked { background: var(--primary); border-color: var(--primary); color: #fff; }
-
-    /* Category chips */
-    .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-    .cat-card { background: #fff; border-radius: var(--radius); padding: 16px; text-align: center; border: 1px solid var(--gray-200); transition: all 0.3s; cursor: pointer; }
-    .cat-card:hover { transform: scale(1.03); box-shadow: var(--shadow); }
-    .cat-card .cat-icon { font-size: 28px; margin-bottom: 8px; }
-    .cat-card .cat-name { font-size: 12px; font-weight: 700; color: var(--dark); }
-    .cat-card .cat-count { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
-
-    /* Broadcast cards */
-    .broadcast-card { background: linear-gradient(135deg, var(--dark), var(--dark-3)); border-radius: var(--radius-lg); padding: 20px; color: #fff; margin-bottom: 12px; }
-    .broadcast-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-    .broadcast-card .platform { font-size: 11px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
-    .broadcast-card .caption-preview { font-size: 12px; opacity: 0.8; margin-top: 8px; white-space: pre-wrap; max-height: 80px; overflow: hidden; }
-
-    /* Upload area */
-    .upload-zone { border: 2px dashed var(--gray-300); border-radius: var(--radius-lg); padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: var(--gray-50); }
-    .upload-zone:hover, .upload-zone.dragover { border-color: var(--primary); background: var(--primary-light); }
-    .upload-zone .icon { font-size: 40px; margin-bottom: 10px; }
-    .upload-zone p { font-size: 13px; color: var(--gray-500); }
-    .upload-zone .small { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
-
-    /* Charts */
-    .mini-bars { display: flex; align-items: flex-end; gap: 6px; height: 80px; padding-top: 10px; }
-    .mini-bars .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .mini-bars .bar { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.6s ease; min-height: 4px; }
-    .mini-bars .bar-label { font-size: 9px; color: var(--gray-400); font-weight: 600; }
-
-    /* Modal */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,10,30,0.6); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: var(--radius-xl); padding: 28px; width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: modalIn 0.3s ease; }
-    @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    .modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.3px; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; font-family: inherit; transition: all 0.2s; background: var(--gray-50); }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.08); background: #fff; }
-    .form-group textarea { resize: vertical; min-height: 70px; }
-    .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-
-    /* Sections */
-    .section { display: none; animation: fadeUp 0.4s ease; }
-    .section.active { display: block; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Search */
-    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .search-input { flex: 1; min-width: 200px; padding: 10px 16px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); }
-    .search-input:focus { outline: none; border-color: var(--primary); }
-    .filter-chip { padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--gray-200); background: #fff; cursor: pointer; transition: all 0.2s; }
-    .filter-chip:hover, .filter-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-    /* Toast */
-    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--dark); color: #fff; padding: 14px 22px; border-radius: 12px; font-size: 13px; font-weight: 500; z-index: 2000; display: none; box-shadow: var(--shadow-lg); }
-    .toast.show { display: flex; align-items: center; gap: 8px; animation: toastIn 0.4s ease; }
-    @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Responsive mobile-first */
-    @media (max-width: 768px) {
-      .sidebar { width: 0; overflow: hidden; }
-      .sidebar:hover { width: 0; }
-      .main { margin-left: 0; }
-      .content { padding: 16px; }
-      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .form-row { grid-template-columns: 1fr; }
-      .mobile-nav { display: flex !important; }
-      .topbar { padding: 12px 16px; }
-    }
-    .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--gray-200); padding: 8px 0; z-index: 100; justify-content: space-around; backdrop-filter: blur(12px); }
-    .mobile-nav .mob-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 9px; color: var(--gray-500); cursor: pointer; padding: 4px 12px; border-radius: 8px; }
-    .mobile-nav .mob-item.active { color: var(--primary); }
-    .mobile-nav .mob-item .mob-icon { font-size: 20px; }
-
-    /* AI result */
-    .ai-result { background: linear-gradient(135deg, var(--primary-light), var(--accent-light)); border: 1px solid rgba(124,58,237,0.15); border-radius: var(--radius); padding: 16px; margin-top: 14px; }
-    .ai-result pre { white-space: pre-wrap; font-family: inherit; font-size: 13px; line-height: 1.6; color: var(--dark); }
-    .copy-btn { position: absolute; top: 8px; right: 8px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>GlamStore - AI-Powered Wholesale Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+--primary:#7c3aed;--primary-dark:#6d28d9;--primary-light:#f5f3ff;
+--accent:#ec4899;--accent-light:#fdf2f8;
+--gold:#d97706;--gold-light:#fffbeb;
+--success:#10b981;--success-light:#ecfdf5;
+--warning:#f59e0b;--danger:#ef4444;
+--dark:#0f0a1e;--dark-2:#1a1333;--dark-3:#2d2250;
+--gray-50:#faf9fc;--gray-100:#f3f1f9;--gray-200:#e8e5f0;
+--gray-300:#d4d0e0;--gray-400:#9f99b2;--gray-500:#6e6885;
+--gray-600:#4a4560;
+--radius:14px;--radius-lg:20px;--radius-xl:24px;
+--shadow:0 4px 20px rgba(124,58,237,0.08);
+--shadow-lg:0 12px 40px rgba(124,58,237,0.15);
+--glass:rgba(255,255,255,0.75);--glass-border:rgba(255,255,255,0.3);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;color:var(--dark);overflow-x:hidden;}
+</style>
 </head>
-
 <body>
-  <div class="app">
-    <nav class="sidebar">
-      <div class="logo">💎</div>
-      <div class="nav">
-        <div class="nav-item active" data-section="dashboard"><span class="icon">📊</span><span class="label">Dashboard</span></div>
-        <div class="nav-item" data-section="products"><span class="icon">💍</span><span class="label">Products</span></div>
-        <div class="nav-item" data-section="categories"><span class="icon">📂</span><span class="label">Categories</span></div>
-        <div class="nav-item" data-section="collections"><span class="icon">✨</span><span class="label">Collections</span></div>
-        <div class="nav-item" data-section="broadcasts"><span class="icon">📢</span><span class="label">Broadcasts</span></div>
-        <div class="nav-item" data-section="customers"><span class="icon">👥</span><span class="label">Customers</span></div>
-        <div class="nav-item" data-section="settings"><span class="icon">⚙️</span><span class="label">Settings</span></div>
-      </div>
-    </nav>
-    <div class="main">
 
-      <!-- DASHBOARD -->
-      <div class="section active" id="sec-dashboard">
-        <div class="topbar"><div><h2>Dashboard</h2><span class="sub">Your business at a glance</span></div><div class="topbar-actions"><button class="btn btn-ghost" onclick="location.reload()">↻</button><button class="btn btn-primary" onclick="seedData()">⚡ Load Demo</button></div></div>
-        <div class="content">
-          <div class="stats-grid" id="dash-stats"></div>
-          <div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;">
-            <div class="card"><div class="card-header"><h3>📈 Weekly Activity</h3></div><div class="mini-bars" id="weekly-chart"></div></div>
-            <div class="card"><div class="card-header"><h3>🏆 Top Categories</h3></div><div id="top-cats"></div></div>
-          </div>
-          <div class="card" style="margin-top:18px;"><div class="card-header"><h3>📢 Recent Broadcasts</h3></div><div id="recent-broadcasts"></div></div>
-        </div>
-      </div>
+<style>
+/* HERO - 3D Immersive */
+.hero{min-height:100vh;background:linear-gradient(135deg,#0f0a1e 0%,#1a0533 40%,#2d1065 100%);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;perspective:1200px;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(124,58,237,0.15) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(236,72,153,0.1) 0%,transparent 50%);}
+.hero-particles{position:absolute;inset:0;overflow:hidden;}
+.particle{position:absolute;width:4px;height:4px;background:rgba(255,255,255,0.3);border-radius:50%;animation:float 8s infinite ease-in-out;}
+@keyframes float{0%,100%{transform:translateY(0) translateX(0);opacity:0.3;}50%{transform:translateY(-100px) translateX(20px);opacity:1;}}
+.hero-content{text-align:center;z-index:10;padding:40px;transform-style:preserve-3d;animation:heroFloat 6s ease-in-out infinite;}
+@keyframes heroFloat{0%,100%{transform:translateY(0) rotateX(0deg);}50%{transform:translateY(-10px) rotateX(1deg);}}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.5rem,7vw,5rem);color:#fff;margin-bottom:16px;line-height:1.1;text-shadow:0 4px 40px rgba(124,58,237,0.5);}
+.hero h1 span{background:linear-gradient(135deg,#a78bfa,#ec4899,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s infinite linear;}
+@keyframes shimmer{0%{filter:hue-rotate(0deg);}100%{filter:hue-rotate(360deg);}}
+.hero p{color:rgba(255,255,255,0.7);font-size:clamp(1rem,2vw,1.25rem);max-width:600px;margin:0 auto 32px;line-height:1.6;}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.hero-cta .btn-hero{padding:14px 32px;border-radius:50px;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all 0.3s;font-family:inherit;}
+.btn-enter{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 8px 30px rgba(124,58,237,0.4);}
+.btn-enter:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 40px rgba(124,58,237,0.6);}
+.btn-demo{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.2) !important;backdrop-filter:blur(8px);}
+.btn-demo:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px);}
+.hero-3d-ring{position:absolute;width:500px;height:500px;border:1px solid rgba(124,58,237,0.2);border-radius:50%;animation:spin3d 20s linear infinite;transform-style:preserve-3d;}
+.hero-3d-ring:nth-child(2){width:650px;height:650px;border-color:rgba(236,72,153,0.1);animation-duration:30s;animation-direction:reverse;}
+.hero-3d-ring:nth-child(3){width:350px;height:350px;border-color:rgba(245,158,11,0.15);animation-duration:15s;}
+@keyframes spin3d{0%{transform:rotateX(60deg) rotateZ(0deg);}100%{transform:rotateX(60deg) rotateZ(360deg);}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:50px;padding:8px 18px;margin-bottom:20px;color:rgba(255,255,255,0.7);font-size:12px;font-weight:500;backdrop-filter:blur(8px);}
+.hero-badge .dot{width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.3);}}
+.scroll-indicator{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.4);font-size:12px;animation:bounce 2s infinite;}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(8px);}}
+</style>
 
-      <!-- PRODUCTS -->
-      <div class="section" id="sec-products">
-        <div class="topbar"><div><h2>Products</h2><span class="sub">Your catalogue</span></div><div class="topbar-actions"><button class="btn btn-ghost" id="bulk-broadcast-btn" style="display:none;" onclick="bulkBroadcast()">📢 Broadcast Selected</button><button class="btn btn-primary" onclick="showModal('product')">+ Add Product</button></div></div>
-        <div class="content">
-          <div class="search-bar">
-            <input class="search-input" id="product-search" placeholder="Search products..." oninput="searchProducts()">
-            <select class="filter-chip" id="product-cat-filter" onchange="searchProducts()"><option value="">All Categories</option></select>
-          </div>
-          <div class="product-grid" id="product-grid"></div>
-        </div>
-      </div>
+<style>
+/* APP LAYOUT */
+.app-wrapper{display:none;min-height:100vh;background:linear-gradient(180deg,#faf9fc 0%,#f3f0ff 50%,#fdf2f8 100%);}
+.app{display:flex;min-height:100vh;}
+.sidebar{width:72px;background:var(--dark);position:fixed;height:100vh;display:flex;flex-direction:column;align-items:center;z-index:100;padding:16px 0;transition:width 0.3s;}
+.sidebar:hover{width:220px;}
+.sidebar .logo{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:24px;cursor:pointer;}
+.nav{flex:1;width:100%;padding:0 10px;overflow:hidden;}
+.nav-item{width:100%;padding:12px;cursor:pointer;display:flex;align-items:center;gap:14px;border-radius:12px;margin-bottom:4px;transition:all 0.2s;color:var(--gray-400);position:relative;overflow:hidden;}
+.nav-item:hover{background:rgba(124,58,237,0.1);color:#fff;}
+.nav-item.active{background:rgba(124,58,237,0.2);color:#fff;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:24px;background:var(--accent);border-radius:0 4px 4px 0;}
+.nav-item .icon{font-size:20px;min-width:20px;text-align:center;}
+.nav-item .label{font-size:13px;font-weight:500;white-space:nowrap;opacity:0;transition:opacity 0.2s;}
+.sidebar:hover .nav-item .label{opacity:1;}
+.main{margin-left:72px;flex:1;min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,252,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--gray-200);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;}
+.topbar h2{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.topbar .sub{font-size:12px;color:var(--gray-500);-webkit-text-fill-color:var(--gray-500);}
+.topbar-actions{display:flex;gap:8px;}
+.content{padding:24px 28px;max-width:1400px;}
+/* Buttons */
+.btn{padding:10px 20px;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;}
+.btn-success{background:var(--success);color:#fff;}
+.btn-ghost{background:var(--glass);border:1px solid var(--gray-200);color:var(--gray-600);backdrop-filter:blur(8px);}
+.btn-ghost:hover{background:#fff;}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:8px;}
+.btn-lg{padding:14px 28px;font-size:15px;border-radius:12px;}
+</style>
 
-      <!-- CATEGORIES -->
-      <div class="section" id="sec-categories">
-        <div class="topbar"><div><h2>Categories</h2><span class="sub">Organize your inventory</span></div><div class="topbar-actions"><button class="btn btn-primary" onclick="showModal('category')">+ Add Category</button></div></div>
-        <div class="content"><div class="cat-grid" id="cat-grid"></div></div>
-      </div>
+<style>
+/* Cards & Stats */
+.card{background:rgba(255,255,255,0.8);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:22px;margin-bottom:18px;transition:all 0.3s;}
+.card:hover{box-shadow:var(--shadow);border-color:rgba(124,58,237,0.15);}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-header h3{font-size:15px;font-weight:700;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:20px;transition:all 0.3s;position:relative;overflow:hidden;}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.stat-card .stat-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;}
+.stat-card .stat-label{font-size:11px;color:var(--gray-500);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.stat-card .stat-value{font-size:26px;font-weight:900;margin:4px 0;}
+.stat-card.purple .stat-icon{background:var(--primary-light);color:var(--primary);}
+.stat-card.pink .stat-icon{background:var(--accent-light);color:var(--accent);}
+.stat-card.gold .stat-icon{background:var(--gold-light);color:var(--gold);}
+.stat-card.green .stat-icon{background:var(--success-light);color:var(--success);}
+/* Product Grid */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.product-card{background:#fff;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--gray-200);transition:all 0.3s;cursor:pointer;position:relative;}
+.product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--primary);}
+.product-card .img-wrap{width:100%;aspect-ratio:1;background:linear-gradient(135deg,var(--gray-100),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
+.product-card .img-wrap .stock-badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.7);color:#fff;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;}
+.product-card .img-wrap .stock-badge.low{background:rgba(239,68,68,0.9);}
+.product-card .info{padding:14px;}
+.product-card .info .cat{font-size:10px;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.product-card .info .name{font-size:14px;font-weight:700;margin:4px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.product-card .info .prices{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.product-card .info .price-wholesale{font-size:16px;font-weight:800;color:var(--primary);}
+.product-card .info .price-retail{font-size:12px;color:var(--gray-400);text-decoration:line-through;}
+.product-card .actions-bar{display:flex;gap:6px;padding:0 14px 14px;}
+.product-card .actions-bar .btn{flex:1;justify-content:center;font-size:11px;padding:7px;}
+.product-card .select-check{position:absolute;top:10px;left:10px;width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,0.9);border:2px solid var(--gray-300);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+.product-card .select-check.checked{background:var(--primary);border-color:var(--primary);color:#fff;}
+/* Categories */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.cat-card{background:#fff;border-radius:var(--radius);padding:16px;text-align:center;border:1px solid var(--gray-200);transition:all 0.3s;cursor:pointer;}
+.cat-card:hover{transform:scale(1.03);box-shadow:var(--shadow);}
+.cat-card .cat-icon{font-size:28px;margin-bottom:8px;}
+.cat-card .cat-name{font-size:12px;font-weight:700;}
+.cat-card .cat-count{font-size:11px;color:var(--gray-400);margin-top:2px;}
+</style>
 
-      <!-- COLLECTIONS -->
-      <div class="section" id="sec-collections">
-        <div class="topbar"><div><h2>Collections</h2><span class="sub">Curated product sets</span></div><div class="topbar-actions"><button class="btn btn-primary" onclick="showModal('collection')">+ New Collection</button></div></div>
-        <div class="content"><div id="collections-list"></div></div>
-      </div>
+<style>
+/* Price Calculator */
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.calc-card{background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(245,243,255,0.9));border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:24px;transition:all 0.3s;}
+.calc-card:hover{box-shadow:var(--shadow-lg);}
+.calc-card h4{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.calc-input{width:100%;padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:16px;font-weight:600;font-family:inherit;transition:all 0.2s;background:var(--gray-50);}
+.calc-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,0.08);background:#fff;}
+.calc-result{margin-top:14px;padding:14px;background:linear-gradient(135deg,var(--primary-light),var(--accent-light));border-radius:12px;border:1px solid rgba(124,58,237,0.1);}
+.calc-result .result-label{font-size:11px;color:var(--gray-500);font-weight:600;text-transform:uppercase;}
+.calc-result .result-value{font-size:24px;font-weight:900;color:var(--primary);margin-top:2px;}
+.margin-slider{width:100%;margin:10px 0;accent-color:var(--primary);height:6px;cursor:pointer;}
+/* AI Tools */
+.ai-tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+.ai-tool-card{background:#fff;border-radius:var(--radius-xl);padding:24px;border:1px solid var(--gray-200);transition:all 0.3s;position:relative;overflow:hidden;}
+.ai-tool-card:hover{border-color:var(--primary);box-shadow:var(--shadow-lg);transform:translateY(-3px);}
+.ai-tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--accent));}
+.ai-tool-card .tool-icon{font-size:32px;margin-bottom:12px;}
+.ai-tool-card h4{font-size:15px;font-weight:700;margin-bottom:6px;}
+.ai-tool-card p{font-size:12px;color:var(--gray-500);margin-bottom:14px;line-height:1.5;}
+.ai-result{background:linear-gradient(135deg,var(--primary-light),var(--accent-light));border:1px solid rgba(124,58,237,0.12);border-radius:var(--radius);padding:16px;margin-top:14px;position:relative;}
+.ai-result pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;color:var(--dark);}
+/* Broadcast */
+.broadcast-card{background:linear-gradient(135deg,var(--dark),var(--dark-3));border-radius:var(--radius-lg);padding:20px;color:#fff;margin-bottom:12px;}
+.broadcast-card h4{font-size:14px;font-weight:700;margin-bottom:6px;}
+.broadcast-card .platform{font-size:11px;opacity:0.7;text-transform:uppercase;letter-spacing:0.5px;}
+/* Search */
+.search-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.search-input{flex:1;min-width:200px;padding:10px 16px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;background:rgba(255,255,255,0.8);backdrop-filter:blur(8px);}
+.search-input:focus{outline:none;border-color:var(--primary);}
+.filter-chip{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--gray-200);background:#fff;cursor:pointer;}
+/* Forms */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:11px;font-weight:700;margin-bottom:5px;color:var(--gray-600);text-transform:uppercase;letter-spacing:0.3px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:14px;font-family:inherit;transition:all 0.2s;background:var(--gray-50);}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(124,58,237,0.08);background:#fff;}
+.form-group textarea{resize:vertical;min-height:70px;}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,10,30,0.6);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:var(--radius-xl);padding:28px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:modalIn 0.3s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+.modal h3{font-size:18px;font-weight:800;margin-bottom:20px;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+/* Sections */
+.section{display:none;animation:fadeUp 0.4s ease;}
+.section.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+/* Weekly chart */
+.mini-bars{display:flex;align-items:flex-end;gap:6px;height:80px;padding-top:10px;}
+.mini-bars .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.mini-bars .bar{width:100%;border-radius:6px 6px 0 0;transition:height 0.6s ease;min-height:4px;}
+.mini-bars .bar-label{font-size:9px;color:var(--gray-400);font-weight:600;}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:14px 22px;border-radius:12px;font-size:13px;font-weight:500;z-index:2000;display:none;box-shadow:var(--shadow-lg);}
+.toast.show{display:flex;align-items:center;gap:8px;animation:toastIn 0.4s ease;}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+/* Mobile */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--gray-200);padding:8px 0;z-index:100;justify-content:space-around;backdrop-filter:blur(12px);}
+.mob-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;color:var(--gray-500);cursor:pointer;padding:4px 10px;border-radius:8px;}
+.mob-item.active{color:var(--primary);}
+.mob-item .mob-icon{font-size:18px;}
+@media(max-width:768px){
+.sidebar{width:0;overflow:hidden;}.sidebar:hover{width:0;}
+.main{margin-left:0;}.content{padding:16px;}
+.product-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+.stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+.form-row{grid-template-columns:1fr;}
+.mobile-nav{display:flex !important;}
+.topbar{padding:12px 16px;}
+.calc-grid,.ai-tools-grid{grid-template-columns:1fr;}
+.hero h1{font-size:2.2rem;}
+}
+</style>
 
-      <!-- BROADCASTS -->
-      <div class="section" id="sec-broadcasts">
-        <div class="topbar"><div><h2>Broadcasts</h2><span class="sub">Create & send product messages</span></div><div class="topbar-actions"><button class="btn btn-primary" onclick="showBroadcastCreator()">+ New Broadcast</button></div></div>
-        <div class="content">
-          <div class="card" id="broadcast-creator" style="display:none;">
-            <div class="card-header"><h3>✨ Create Broadcast</h3></div>
-            <div class="form-group"><label>Select Products</label><div id="broadcast-product-select" style="max-height:150px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:10px;padding:10px;"></div></div>
-            <div class="form-row">
-              <div class="form-group"><label>Platform</label><select id="bc-platform"><option value="whatsapp">WhatsApp</option><option value="instagram">Instagram</option></select></div>
-              <div class="form-group"><label>Style</label><select id="bc-style"><option value="professional">Professional</option><option value="trendy">Trendy</option><option value="luxury">Luxury</option><option value="casual">Casual</option></select></div>
-            </div>
-            <button class="btn btn-primary" onclick="generateBroadcast()">⚡ Generate Caption</button>
-            <div id="broadcast-result" style="margin-top:16px;"></div>
-          </div>
-          <div id="broadcast-history"></div>
-        </div>
-      </div>
-
-      <!-- CUSTOMERS -->
-      <div class="section" id="sec-customers">
-        <div class="topbar"><div><h2>Customers</h2><span class="sub">Your buyer network</span></div><div class="topbar-actions"><button class="btn btn-primary" onclick="showModal('customer')">+ Add Customer</button></div></div>
-        <div class="content"><div class="card"><table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">Name</th><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">City</th><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">Type</th><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">Orders</th><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">Value</th></tr></thead><tbody id="customer-table"></tbody></table></div></div>
-      </div>
-
-      <!-- SETTINGS -->
-      <div class="section" id="sec-settings">
-        <div class="topbar"><div><h2>Settings</h2><span class="sub">Business configuration</span></div></div>
-        <div class="content">
-          <div class="card">
-            <div class="card-header"><h3>Business Details</h3></div>
-            <div class="form-row"><div class="form-group"><label>Business Name</label><input id="s-name" placeholder="Your Store Name"></div><div class="form-group"><label>Phone</label><input id="s-phone" placeholder="+91-XXXXXXXXXX"></div></div>
-            <div class="form-row"><div class="form-group"><label>WhatsApp</label><input id="s-whatsapp" placeholder="+91-XXXXXXXXXX"></div><div class="form-group"><label>Instagram</label><input id="s-instagram" placeholder="@yourhandle"></div></div>
-            <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
-          </div>
-        </div>
-      </div>
+<!-- HERO SECTION -->
+<section class="hero" id="hero-section">
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-3d-ring"></div>
+  <div class="hero-3d-ring"></div>
+  <div class="hero-3d-ring"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> AI-Powered Wholesale Platform</div>
+    <h1>Your Catalogue.<br><span>Reimagined.</span></h1>
+    <p>Upload products in seconds. Generate WhatsApp & Instagram captions with AI. Broadcast to your buyers instantly. Built for wholesale speed.</p>
+    <div class="hero-cta">
+      <button class="btn-hero btn-enter" onclick="enterApp()">Enter Platform →</button>
+      <button class="btn-hero btn-demo" onclick="enterApp();setTimeout(seedData,500)">Load Demo Data</button>
     </div>
   </div>
+  <div class="scroll-indicator">↓ Scroll to explore</div>
+</section>
 
-  <!-- Mobile Nav -->
-  <div class="mobile-nav">
-    <div class="mob-item active" data-section="dashboard"><span class="mob-icon">📊</span>Home</div>
-    <div class="mob-item" data-section="products"><span class="mob-icon">💍</span>Products</div>
-    <div class="mob-item" data-section="broadcasts"><span class="mob-icon">📢</span>Broadcast</div>
-    <div class="mob-item" data-section="customers"><span class="mob-icon">👥</span>Customers</div>
-    <div class="mob-item" data-section="settings"><span class="mob-icon">⚙️</span>Settings</div>
+<!-- APP -->
+<div class="app-wrapper" id="app-wrapper">
+<div class="app">
+<nav class="sidebar">
+  <div class="logo" onclick="showHero()">💎</div>
+  <div class="nav">
+    <div class="nav-item active" data-section="dashboard"><span class="icon">📊</span><span class="label">Dashboard</span></div>
+    <div class="nav-item" data-section="products"><span class="icon">💍</span><span class="label">Products</span></div>
+    <div class="nav-item" data-section="categories"><span class="icon">📂</span><span class="label">Categories</span></div>
+    <div class="nav-item" data-section="calculator"><span class="icon">🧮</span><span class="label">Calculator</span></div>
+    <div class="nav-item" data-section="ai-tools"><span class="icon">🤖</span><span class="label">AI Tools</span></div>
+    <div class="nav-item" data-section="broadcasts"><span class="icon">📢</span><span class="label">Broadcasts</span></div>
+    <div class="nav-item" data-section="customers"><span class="icon">👥</span><span class="label">Customers</span></div>
+    <div class="nav-item" data-section="settings"><span class="icon">⚙️</span><span class="label">Settings</span></div>
   </div>
+</nav>
+<div class="main">
 
-  <!-- Modal -->
-  <div class="modal-overlay" id="modal"><div class="modal" id="modal-content"></div></div>
-  <div class="toast" id="toast"></div>
+<!-- DASHBOARD -->
+<div class="section active" id="sec-dashboard">
+<div class="topbar"><div><h2>Dashboard</h2><span class="sub">Business overview</span></div><div class="topbar-actions"><button class="btn btn-ghost" onclick="location.reload()">↻</button><button class="btn btn-primary" onclick="seedData()">⚡ Load Demo</button></div></div>
+<div class="content">
+<div class="stats-grid" id="dash-stats"></div>
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;">
+<div class="card"><div class="card-header"><h3>📈 Weekly Activity</h3></div><div class="mini-bars" id="weekly-chart"></div></div>
+<div class="card"><div class="card-header"><h3>🏆 Top Categories</h3></div><div id="top-cats"></div></div>
+</div>
+<div class="card" style="margin-top:18px;"><div class="card-header"><h3>📢 Recent Broadcasts</h3></div><div id="recent-broadcasts"></div></div>
+</div></div>
 
-  <script>
-    let selectedProducts = new Set();
-    let allProducts = [];
+<!-- PRODUCTS -->
+<div class="section" id="sec-products">
+<div class="topbar"><div><h2>Products</h2><span class="sub">Your catalogue</span></div><div class="topbar-actions"><button class="btn btn-ghost" id="bulk-broadcast-btn" style="display:none;" onclick="bulkBroadcast()">📢 Broadcast</button><button class="btn btn-primary" onclick="showModal('product')">+ Add Product</button></div></div>
+<div class="content">
+<div class="search-bar"><input class="search-input" id="product-search" placeholder="Search products..." oninput="searchProducts()"><select class="filter-chip" id="product-cat-filter" onchange="searchProducts()"><option value="">All Categories</option></select></div>
+<div class="product-grid" id="product-grid"></div>
+</div></div>
 
-    // Nav
-    document.querySelectorAll('.nav-item, .mob-item').forEach(item => {
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.nav-item, .mob-item').forEach(n => n.classList.remove('active'));
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll(`[data-section="${item.dataset.section}"]`).forEach(n => n.classList.add('active'));
-        document.getElementById('sec-' + item.dataset.section).classList.add('active');
-        loadSection(item.dataset.section);
-      });
-    });
+<!-- CATEGORIES -->
+<div class="section" id="sec-categories">
+<div class="topbar"><div><h2>Categories</h2><span class="sub">Organize inventory</span></div><div class="topbar-actions"><button class="btn btn-primary" onclick="showModal('category')">+ Add</button></div></div>
+<div class="content"><div class="cat-grid" id="cat-grid"></div></div></div>
 
-    function toast(msg) { const t=document.getElementById('toast'); t.textContent='✓ '+msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-    async function api(path, opts={}) { const r=await fetch(path,{headers:{'Content-Type':'application/json'},...opts}); return r.json(); }
-    function formatINR(n) { if(!n)return '₹0'; n=Number(n); if(n>=100000)return '₹'+(n/100000).toFixed(1)+'L'; return '₹'+n.toLocaleString('en-IN'); }
+<!-- PRICE CALCULATOR -->
+<div class="section" id="sec-calculator">
+<div class="topbar"><div><h2>Price Calculator</h2><span class="sub">Profit margin & pricing tool</span></div></div>
+<div class="content">
+<div class="calc-grid">
+<div class="calc-card"><h4>💰 Margin Calculator</h4>
+<div class="form-group"><label>Wholesale/Cost Price (₹)</label><input type="number" class="calc-input" id="calc-cost" placeholder="e.g. 300" oninput="calculatePricing()"></div>
+<div class="form-group"><label>Profit Margin: <strong id="margin-display">100%</strong></label><input type="range" class="margin-slider" id="calc-margin" min="10" max="300" value="100" oninput="calculatePricing()"></div>
+<div class="calc-result"><div class="result-label">Selling Price</div><div class="result-value" id="calc-selling">₹0</div></div>
+<div class="calc-result" style="margin-top:8px;"><div class="result-label">Profit per piece</div><div class="result-value" id="calc-profit" style="color:var(--success);">₹0</div></div>
+</div>
+<div class="calc-card"><h4>📦 Bulk Calculator</h4>
+<div class="form-group"><label>Cost Price (₹)</label><input type="number" class="calc-input" id="bulk-cost" placeholder="300" oninput="calcBulk()"></div>
+<div class="form-group"><label>Quantity</label><input type="number" class="calc-input" id="bulk-qty" placeholder="100" oninput="calcBulk()"></div>
+<div class="form-group"><label>Selling Price (₹)</label><input type="number" class="calc-input" id="bulk-sell" placeholder="650" oninput="calcBulk()"></div>
+<div class="calc-result"><div class="result-label">Total Investment</div><div class="result-value" id="bulk-invest">₹0</div></div>
+<div class="calc-result" style="margin-top:8px;"><div class="result-label">Total Profit</div><div class="result-value" id="bulk-profit" style="color:var(--success);">₹0</div></div>
+<div class="calc-result" style="margin-top:8px;"><div class="result-label">ROI</div><div class="result-value" id="bulk-roi" style="color:var(--primary);">0%</div></div>
+</div>
+<div class="calc-card"><h4>🏷️ MRP Breakdow</h4>
+<div class="form-group"><label>MRP (₹)</label><input type="number" class="calc-input" id="mrp-price" placeholder="999" oninput="calcMRP()"></div>
+<div class="form-group"><label>Your Cost (₹)</label><input type="number" class="calc-input" id="mrp-cost" placeholder="300" oninput="calcMRP()"></div>
+<div class="calc-result"><div class="result-label">Your Margin</div><div class="result-value" id="mrp-margin">0%</div></div>
+<div class="calc-result" style="margin-top:8px;"><div class="result-label">Profit per piece</div><div class="result-value" id="mrp-profit" style="color:var(--success);">₹0</div></div>
+<div id="mrp-verdict" style="margin-top:10px;font-size:12px;font-weight:600;"></div>
+</div>
+</div>
+</div></div>
 
-    function loadSection(s) {
-      const m={dashboard:loadDashboard,products:loadProducts,categories:loadCategories,collections:loadCollections,broadcasts:loadBroadcasts,customers:loadCustomers,settings:loadSettings};
-      if(m[s])m[s]();
-    }
+<!-- AI TOOLS -->
+<div class="section" id="sec-ai-tools">
+<div class="topbar"><div><h2>AI Tools</h2><span class="sub">Automate your content & pricing</span></div></div>
+<div class="content">
+<div class="ai-tools-grid">
+<div class="ai-tool-card"><div class="tool-icon">📱</div><h4>WhatsApp Message Generator</h4><p>Generate formatted sales messages with pricing, emojis & CTA for WhatsApp broadcasts.</p>
+<div class="form-group"><label>Select Product</label><select id="ai-wa-product" class="calc-input"></select></div>
+<button class="btn btn-primary" onclick="aiWhatsApp()">Generate Message</button>
+<div id="ai-wa-result"></div></div>
 
-    // DASHBOARD
-    async function loadDashboard() {
-      const d = await api('/api/analytics/dashboard');
-      document.getElementById('dash-stats').innerHTML = `
-        <div class="stat-card purple"><div class="stat-icon">💍</div><div class="stat-label">Total Products</div><div class="stat-value">${d.total_products}</div></div>
-        <div class="stat-card pink"><div class="stat-icon">📦</div><div class="stat-label">Uploaded Today</div><div class="stat-value">${d.uploaded_today}</div></div>
-        <div class="stat-card gold"><div class="stat-icon">⚠️</div><div class="stat-label">Low Stock</div><div class="stat-value">${d.low_stock}</div></div>
-        <div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-label">Inventory Value</div><div class="stat-value">${formatINR(d.total_inventory_value)}</div></div>
-      `;
-      // Weekly chart
-      const max = Math.max(...d.weekly_activity.map(w=>w.products),1);
-      document.getElementById('weekly-chart').innerHTML = d.weekly_activity.map(w => `
-        <div class="bar-col">
-          <div class="bar" style="height:${Math.max((w.products/max)*60,4)}px;background:linear-gradient(180deg,var(--primary),var(--accent));"></div>
-          <div class="bar-label">${w.day}</div>
-        </div>`).join('');
-      // Top cats
-      document.getElementById('top-cats').innerHTML = d.top_categories.length ? d.top_categories.map(c => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:13px;font-weight:600;">${c.name}</span><span style="font-size:12px;color:var(--primary);font-weight:700;">${c.count}</span></div>`).join('') : '<p style="color:var(--gray-400);font-size:13px;">Load demo data to see stats</p>';
-      // Recent broadcasts
-      document.getElementById('recent-broadcasts').innerHTML = d.recent_broadcasts.length ? d.recent_broadcasts.map(b => `<div class="broadcast-card"><div class="platform">${b.platform} • ${b.status}</div><h4>${b.title}</h4></div>`).join('') : '<p style="color:var(--gray-400);font-size:13px;">No broadcasts yet</p>';
-    }
+<div class="ai-tool-card"><div class="tool-icon">📸</div><h4>Instagram Caption Generator</h4><p>Create trendy captions with hashtags for your product posts and reels.</p>
+<div class="form-group"><label>Select Product</label><select id="ai-ig-product" class="calc-input"></select></div>
+<div class="form-group"><label>Style</label><select id="ai-ig-style" class="calc-input"><option value="trendy">Trendy & Fun</option><option value="luxury">Luxury & Elegant</option><option value="casual">Casual & Friendly</option></select></div>
+<button class="btn btn-primary" onclick="aiInstagram()">Generate Caption</button>
+<div id="ai-ig-result"></div></div>
 
-    // PRODUCTS
-    async function loadProducts() {
-      const cats = await api('/api/categories');
-      document.getElementById('product-cat-filter').innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option>${c.name}</option>`).join('');
-      searchProducts();
-    }
-    async function searchProducts() {
-      const search = document.getElementById('product-search').value;
-      const cat = document.getElementById('product-cat-filter').value;
-      let url = '/api/products?';
-      if(search) url += `search=${encodeURIComponent(search)}&`;
-      if(cat) url += `category=${encodeURIComponent(cat)}&`;
-      allProducts = await api(url);
-      renderProducts();
-    }
-    function renderProducts() {
-      const grid = document.getElementById('product-grid');
-      if(!allProducts.length) { grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--gray-400);"><p style="font-size:40px;">💍</p><p style="margin-top:10px;">No products yet. Add your first product!</p></div>'; return; }
-      grid.innerHTML = allProducts.map(p => {
-        const imgContent = p.images && p.images.length ? `<img src="${p.images[0]}" alt="">` : getCategoryEmoji(p.category);
-        const isLow = p.stock <= 5;
-        const isSelected = selectedProducts.has(p.id);
-        return `<div class="product-card">
-          <div class="select-check ${isSelected?'checked':''}" onclick="event.stopPropagation();toggleSelect(${p.id});">${isSelected?'✓':''}</div>
-          <div class="img-wrap">${imgContent}${isLow?'<div class="stock-badge low">Low Stock: '+p.stock+'</div>':'<div class="stock-badge">Stock: '+p.stock+'</div>'}</div>
-          <div class="info"><div class="cat">${p.category||'Uncategorized'}</div><div class="name">${p.name}</div><div class="prices"><span class="price-wholesale">₹${p.wholesale_price}</span><span class="price-retail">₹${p.retail_price}</span></div></div>
-          <div class="actions-bar"><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();genWhatsApp(${p.id})">📱 WA</button><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();genInsta(${p.id})">📸 IG</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteProduct(${p.id})">🗑</button></div>
-        </div>`;
-      }).join('');
-      document.getElementById('bulk-broadcast-btn').style.display = selectedProducts.size > 0 ? 'inline-flex' : 'none';
-    }
-    function toggleSelect(id) { selectedProducts.has(id)?selectedProducts.delete(id):selectedProducts.add(id); renderProducts(); }
-    function getCategoryEmoji(cat) { const m={'Necklaces':'📿','Earrings':'✨','Bangles':'⭕','Bracelets':'💫','Rings':'💍','Mangalsutra':'🪷','Cosmetics':'💄','Lipsticks':'💋','Foundations':'🧴','Skin Care':'🧖','Hair Care':'💇'}; return m[cat]||'💎'; }
+<div class="ai-tool-card"><div class="tool-icon">✍️</div><h4>Product Description Writer</h4><p>Generate professional product descriptions for your catalogue listings.</p>
+<div class="form-group"><label>Select Product</label><select id="ai-desc-product" class="calc-input"></select></div>
+<div class="form-group"><label>Tone</label><select id="ai-desc-style" class="calc-input"><option value="professional">Professional</option><option value="casual">Casual</option><option value="luxury">Luxury</option></select></div>
+<button class="btn btn-primary" onclick="aiDescription()">Write Description</button>
+<div id="ai-desc-result"></div></div>
 
-    async function deleteProduct(id) { if(!confirm('Delete this product?'))return; await api(`/api/products/${id}`,{method:'DELETE'}); toast('Product deleted'); searchProducts(); }
-    async function genWhatsApp(id) {
-      const r = await api('/api/broadcasts/generate-whatsapp',{method:'POST',body:JSON.stringify({product_ids:[id]})});
-      showCaptionResult('WhatsApp Message', r.caption);
-    }
-    async function genInsta(id) {
-      const r = await api('/api/broadcasts/generate-instagram',{method:'POST',body:JSON.stringify({product_ids:[id]})});
-      showCaptionResult('Instagram Caption', r.caption + '\n\n' + r.hashtags);
-    }
-    function showCaptionResult(title, text) {
-      document.getElementById('modal-content').innerHTML = `<h3>${title}</h3><div class="ai-result" style="position:relative;"><pre>${text}</pre></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="copyText(\`${text.replace(/`/g,'\\`')}\`)">📋 Copy</button></div>`;
-      document.getElementById('modal').classList.add('show');
-    }
-    function copyText(t) { navigator.clipboard.writeText(t); toast('Copied to clipboard!'); }
+<div class="ai-tool-card"><div class="tool-icon">💰</div><h4>Smart Price Advisor</h4><p>Get AI-suggested retail prices based on category benchmarks and market markups.</p>
+<div class="form-row">
+<div class="form-group"><label>Wholesale ₹</label><input type="number" id="ai-price-wp" class="calc-input" placeholder="300"></div>
+<div class="form-group"><label>Category</label><select id="ai-price-cat" class="calc-input"><option>Necklaces</option><option>Earrings</option><option>Bangles</option><option>Bracelets</option><option>Rings</option><option>Mangalsutra</option><option>Cosmetics</option><option>Lipsticks</option><option>Foundations</option><option>Skin Care</option><option>Hair Care</option></select></div>
+</div>
+<button class="btn btn-primary" onclick="aiPrice()">Get Suggestion</button>
+<div id="ai-price-result"></div></div>
 
-    // CATEGORIES
-    async function loadCategories() {
-      const cats = await api('/api/categories');
-      document.getElementById('cat-grid').innerHTML = cats.map(c => `
-        <div class="cat-card" onclick="filterByCategory('${c.name}')">
-          <div class="cat-icon">${c.icon}</div>
-          <div class="cat-name">${c.name}</div>
-          <div class="cat-count">${c.count} products</div>
-        </div>`).join('');
-    }
-    function filterByCategory(name) {
-      document.querySelector('[data-section="products"]').click();
-      setTimeout(()=>{ document.getElementById('product-cat-filter').value=name; searchProducts(); },100);
-    }
+<div class="ai-tool-card"><div class="tool-icon">#️⃣</div><h4>Hashtag Generator</h4><p>Generate trending hashtags for Instagram & Facebook based on product category.</p>
+<div class="form-group"><label>Category</label><select id="ai-hash-cat" class="calc-input"><option>Necklaces</option><option>Earrings</option><option>Bangles</option><option>Bracelets</option><option>Rings</option><option>Mangalsutra</option><option>Cosmetics</option><option>Lipsticks</option><option>Foundations</option><option>Skin Care</option><option>Hair Care</option></select></div>
+<button class="btn btn-primary" onclick="aiHashtags()">Generate Hashtags</button>
+<div id="ai-hash-result"></div></div>
 
-    // COLLECTIONS
-    async function loadCollections() {
-      const cols = await api('/api/collections');
-      document.getElementById('collections-list').innerHTML = cols.length ? cols.map(c => `
-        <div class="card" style="cursor:pointer;" onclick="filterByCollection('${c.name}')">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div><h3 style="font-size:16px;font-weight:700;">${c.name}</h3><p style="font-size:12px;color:var(--gray-500);">${c.description||''}</p></div>
-            <div style="text-align:right;"><div style="font-size:22px;font-weight:800;color:var(--primary);">${c.product_count}</div><div style="font-size:11px;color:var(--gray-400);">products</div></div>
-          </div>
-        </div>`).join('') : '<div style="text-align:center;padding:40px;color:var(--gray-400);">No collections yet</div>';
-    }
-    function filterByCollection(name) {
-      document.querySelector('[data-section="products"]').click();
-      setTimeout(()=>{ document.getElementById('product-search').value=name; searchProducts(); },100);
-    }
+<div class="ai-tool-card"><div class="tool-icon">📊</div><h4>Competitor Price Analyzer</h4><p>Compare your pricing against market averages for your category.</p>
+<div class="form-row">
+<div class="form-group"><label>Your Price ₹</label><input type="number" id="ai-comp-price" class="calc-input" placeholder="500"></div>
+<div class="form-group"><label>Category</label><select id="ai-comp-cat" class="calc-input"><option>Necklaces</option><option>Earrings</option><option>Bangles</option><option>Bracelets</option><option>Rings</option><option>Mangalsutra</option><option>Cosmetics</option><option>Lipsticks</option></select></div>
+</div>
+<button class="btn btn-primary" onclick="aiCompare()">Analyze</button>
+<div id="ai-comp-result"></div></div>
+</div>
+</div></div>
 
-    // BROADCASTS
-    async function loadBroadcasts() {
-      const broadcasts = await api('/api/broadcasts');
-      document.getElementById('broadcast-history').innerHTML = broadcasts.length ? broadcasts.map(b => `
-        <div class="broadcast-card"><div class="platform">${b.platform} • ${b.status}${b.sent_at?' • '+new Date(b.sent_at).toLocaleDateString('en-IN'):''}</div><h4>${b.title}</h4>${b.caption?'<div class="caption-preview">'+b.caption.substring(0,100)+'...</div>':''}</div>
-      `).join('') : '<div style="text-align:center;padding:40px;color:var(--gray-400);">No broadcasts yet. Create your first!</div>';
-    }
-    function showBroadcastCreator() {
-      document.getElementById('broadcast-creator').style.display='block';
-      loadBroadcastProducts();
-    }
-    async function loadBroadcastProducts() {
-      const products = await api('/api/products');
-      document.getElementById('broadcast-product-select').innerHTML = products.map(p => `<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;cursor:pointer;"><input type="checkbox" class="bc-prod" value="${p.id}" ${selectedProducts.has(p.id)?'checked':''}> ${p.name} <span style="color:var(--gray-400);">₹${p.wholesale_price}</span></label>`).join('');
-    }
-    async function generateBroadcast() {
-      const checkboxes = document.querySelectorAll('.bc-prod:checked');
-      const ids = Array.from(checkboxes).map(c=>parseInt(c.value));
-      if(!ids.length){toast('Select at least one product');return;}
-      const platform = document.getElementById('bc-platform').value;
-      const style = document.getElementById('bc-style').value;
-      const endpoint = platform==='whatsapp'?'/api/broadcasts/generate-whatsapp':'/api/broadcasts/generate-instagram';
-      const r = await api(endpoint,{method:'POST',body:JSON.stringify({product_ids:ids,tone:style,style})});
-      const caption = r.caption + (r.hashtags ? '\n\n'+r.hashtags : '');
-      document.getElementById('broadcast-result').innerHTML = `<div class="ai-result" style="position:relative;"><pre>${caption}</pre></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary" onclick="copyText(\`${caption.replace(/`/g,'\\`').replace(/\n/g,'\\n')}\`)">📋 Copy Caption</button><button class="btn btn-success" onclick="saveBroadcast('${platform}',\`${caption.replace(/`/g,'').substring(0,50)}\`)">💾 Save</button></div>`;
-      toast('Caption generated!');
-    }
-    async function saveBroadcast(platform, title) {
-      await api('/api/broadcasts',{method:'POST',body:JSON.stringify({title,platform,product_ids:Array.from(selectedProducts),status:'draft'})});
-      toast('Broadcast saved!'); loadBroadcasts();
-    }
-    function bulkBroadcast() { document.querySelector('[data-section="broadcasts"]').click(); setTimeout(showBroadcastCreator,200); }
+<!-- BROADCASTS -->
+<div class="section" id="sec-broadcasts">
+<div class="topbar"><div><h2>Broadcasts</h2><span class="sub">Create & send</span></div><div class="topbar-actions"><button class="btn btn-primary" onclick="showBroadcastCreator()">+ New Broadcast</button></div></div>
+<div class="content">
+<div class="card" id="broadcast-creator" style="display:none;"><div class="card-header"><h3>✨ Create Broadcast</h3></div>
+<div class="form-group"><label>Select Products</label><div id="broadcast-product-select" style="max-height:150px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:10px;padding:10px;"></div></div>
+<div class="form-row"><div class="form-group"><label>Platform</label><select id="bc-platform"><option value="whatsapp">WhatsApp</option><option value="instagram">Instagram</option></select></div><div class="form-group"><label>Style</label><select id="bc-style"><option value="professional">Professional</option><option value="trendy">Trendy</option><option value="luxury">Luxury</option></select></div></div>
+<button class="btn btn-primary" onclick="generateBroadcast()">⚡ Generate Caption</button>
+<div id="broadcast-result" style="margin-top:16px;"></div></div>
+<div id="broadcast-history"></div>
+</div></div>
 
-    // CUSTOMERS
-    async function loadCustomers() {
-      const customers = await api('/api/customers');
-      document.getElementById('customer-table').innerHTML = customers.map(c => `<tr><td style="padding:12px;font-weight:600;font-size:13px;">${c.name}</td><td style="padding:12px;font-size:13px;">${c.city||'-'}</td><td style="padding:12px;"><span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${c.type==='wholesaler'?'var(--primary-light)':'var(--gold-light)'};color:${c.type==='wholesaler'?'var(--primary)':'var(--gold)'};">${c.type}</span></td><td style="padding:12px;font-size:13px;">${c.total_orders||0}</td><td style="padding:12px;font-size:13px;font-weight:700;color:var(--success);">${formatINR(c.total_value)}</td></tr>`).join('');
-    }
+<!-- CUSTOMERS -->
+<div class="section" id="sec-customers">
+<div class="topbar"><div><h2>Customers</h2><span class="sub">Buyer network</span></div><div class="topbar-actions"><button class="btn btn-primary" onclick="showModal('customer')">+ Add</button></div></div>
+<div class="content"><div class="card"><table style="width:100%;border-collapse:collapse;"><thead><tr><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">Name</th><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">City</th><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">Type</th><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">Orders</th><th style="text-align:left;padding:10px;font-size:11px;color:var(--gray-500);border-bottom:1px solid var(--gray-200);">Value</th></tr></thead><tbody id="customer-table"></tbody></table></div></div></div>
 
-    // SETTINGS
-    async function loadSettings() {
-      const s = await api('/api/settings');
-      document.getElementById('s-name').value = s.business_name||'';
-      document.getElementById('s-phone').value = s.phone||'';
-      document.getElementById('s-whatsapp').value = s.whatsapp||'';
-      document.getElementById('s-instagram').value = s.instagram||'';
-    }
-    async function saveSettings() {
-      await api('/api/settings',{method:'PATCH',body:JSON.stringify({business_name:document.getElementById('s-name').value,phone:document.getElementById('s-phone').value,whatsapp:document.getElementById('s-whatsapp').value,instagram:document.getElementById('s-instagram').value})});
-      toast('Settings saved!');
-    }
+<!-- SETTINGS -->
+<div class="section" id="sec-settings">
+<div class="topbar"><div><h2>Settings</h2><span class="sub">Business config</span></div></div>
+<div class="content"><div class="card"><div class="card-header"><h3>Business Details</h3></div>
+<div class="form-row"><div class="form-group"><label>Business Name</label><input id="s-name" placeholder="Your Store"></div><div class="form-group"><label>Phone</label><input id="s-phone" placeholder="+91-"></div></div>
+<div class="form-row"><div class="form-group"><label>WhatsApp</label><input id="s-whatsapp" placeholder="+91-"></div><div class="form-group"><label>Instagram</label><input id="s-instagram" placeholder="@handle"></div></div>
+<button class="btn btn-primary" onclick="saveSettings()">Save</button></div></div></div>
 
-    // MODALS
-    function showModal(type) {
-      const cats = ['Necklaces','Earrings','Bangles','Bracelets','Rings','Mangalsutra','Cosmetics','Lipsticks','Foundations','Skin Care','Hair Care'];
-      const forms = {
-        product: `<h3>Add Product</h3>
-          <div class="form-group"><label>Product Name *</label><input id="f-name" placeholder="e.g. Kundan Pearl Necklace Set"></div>
-          <div class="form-row"><div class="form-group"><label>Category</label><select id="f-category">${cats.map(c=>'<option>'+c+'</option>').join('')}</select></div><div class="form-group"><label>SKU (auto)</label><input id="f-sku" placeholder="Auto-generated"></div></div>
-          <div class="form-row"><div class="form-group"><label>Wholesale Price ₹</label><input id="f-wprice" type="number" placeholder="e.g. 450"></div><div class="form-group"><label>Retail Price ₹</label><input id="f-rprice" type="number" placeholder="e.g. 999"></div></div>
-          <div class="form-row"><div class="form-group"><label>Stock Qty</label><input id="f-stock" type="number" value="10"></div><div class="form-group"><label>Material</label><input id="f-material" placeholder="e.g. Alloy + Kundan"></div></div>
-          <div class="form-row"><div class="form-group"><label>Color</label><input id="f-color" placeholder="e.g. Gold/White"></div><div class="form-group"><label>Weight</label><input id="f-weight" placeholder="e.g. 85g"></div></div>
-          <div class="form-group"><label>Tags</label><input id="f-tags" placeholder="comma separated: kundan, bridal, pearl"></div>
-          <div class="form-group"><label>Description</label><textarea id="f-desc" placeholder="Product description (or leave blank for AI)"></textarea></div>
-          <div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitProduct()">Add Product</button></div>`,
-        category: `<h3>Add Category</h3><div class="form-group"><label>Name</label><input id="f-cat-name" placeholder="Category name"></div><div class="form-group"><label>Icon (emoji)</label><input id="f-cat-icon" placeholder="e.g. 💍"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitCategory()">Add</button></div>`,
-        collection: `<h3>New Collection</h3><div class="form-group"><label>Name</label><input id="f-col-name" placeholder="e.g. Summer 2026"></div><div class="form-group"><label>Description</label><textarea id="f-col-desc" placeholder="Collection description"></textarea></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitCollection()">Create</button></div>`,
-        customer: `<h3>Add Customer</h3><div class="form-row"><div class="form-group"><label>Name</label><input id="f-cust-name" placeholder="Store/Person name"></div><div class="form-group"><label>Phone</label><input id="f-cust-phone" placeholder="+91-"></div></div><div class="form-row"><div class="form-group"><label>City</label><input id="f-cust-city" placeholder="e.g. Meerut"></div><div class="form-group"><label>Type</label><select id="f-cust-type"><option>retailer</option><option>wholesaler</option></select></div></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitCustomer()">Add</button></div>`
-      };
-      document.getElementById('modal-content').innerHTML = forms[type];
-      document.getElementById('modal').classList.add('show');
-    }
-    function closeModal() { document.getElementById('modal').classList.remove('show'); }
-    document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget)closeModal(); });
+</div></div>
+<!-- Mobile Nav -->
+<div class="mobile-nav"><div class="mob-item active" data-section="dashboard"><span class="mob-icon">📊</span>Home</div><div class="mob-item" data-section="products"><span class="mob-icon">💍</span>Products</div><div class="mob-item" data-section="calculator"><span class="mob-icon">🧮</span>Calc</div><div class="mob-item" data-section="ai-tools"><span class="mob-icon">🤖</span>AI</div><div class="mob-item" data-section="broadcasts"><span class="mob-icon">📢</span>Send</div></div>
+</div>
+<!-- Modal -->
+<div class="modal-overlay" id="modal"><div class="modal" id="modal-content"></div></div>
+<div class="toast" id="toast"></div>
 
-    async function submitProduct() {
-      const name = document.getElementById('f-name').value;
-      if(!name){toast('Product name required');return;}
-      const wp = parseFloat(document.getElementById('f-wprice').value)||0;
-      await api('/api/products',{method:'POST',body:JSON.stringify({
-        name, category:document.getElementById('f-category').value,
-        sku:document.getElementById('f-sku').value,
-        wholesale_price:wp, retail_price:parseFloat(document.getElementById('f-rprice').value)||Math.round(wp*2.2),
-        stock:parseInt(document.getElementById('f-stock').value)||0,
-        material:document.getElementById('f-material').value,
-        color:document.getElementById('f-color').value,
-        weight:document.getElementById('f-weight').value,
-        tags:document.getElementById('f-tags').value,
-        description:document.getElementById('f-desc').value
-      })});
-      closeModal(); toast('Product added!'); searchProducts();
-    }
-    async function submitCategory() {
-      await api('/api/categories',{method:'POST',body:JSON.stringify({name:document.getElementById('f-cat-name').value,icon:document.getElementById('f-cat-icon').value||'📦'})});
-      closeModal(); toast('Category added!'); loadCategories();
-    }
-    async function submitCollection() {
-      await api('/api/collections',{method:'POST',body:JSON.stringify({name:document.getElementById('f-col-name').value,description:document.getElementById('f-col-desc').value})});
-      closeModal(); toast('Collection created!'); loadCollections();
-    }
-    async function submitCustomer() {
-      await api('/api/customers',{method:'POST',body:JSON.stringify({name:document.getElementById('f-cust-name').value,phone:document.getElementById('f-cust-phone').value,city:document.getElementById('f-cust-city').value,type:document.getElementById('f-cust-type').value})});
-      closeModal(); toast('Customer added!'); loadCustomers();
-    }
+<script>
+let selectedProducts=new Set(),allProducts=[];
+// Hero
+function enterApp(){document.getElementById('hero-section').style.display='none';document.getElementById('app-wrapper').style.display='block';loadDashboard();}
+function showHero(){document.getElementById('hero-section').style.display='flex';document.getElementById('app-wrapper').style.display='none';}
+// Particles
+(function(){const c=document.getElementById('particles');for(let i=0;i<40;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.top=Math.random()*100+'%';p.style.animationDelay=Math.random()*8+'s';p.style.animationDuration=(6+Math.random()*6)+'s';c.appendChild(p);}})();
+// Nav
+document.querySelectorAll('.nav-item,.mob-item').forEach(item=>{item.addEventListener('click',()=>{document.querySelectorAll('.nav-item,.mob-item').forEach(n=>n.classList.remove('active'));document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelectorAll(`[data-section="${item.dataset.section}"]`).forEach(n=>n.classList.add('active'));document.getElementById('sec-'+item.dataset.section).classList.add('active');loadSection(item.dataset.section);});});
+function toast(m){const t=document.getElementById('toast');t.textContent='✓ '+m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+async function api(p,o={}){const r=await fetch(p,{headers:{'Content-Type':'application/json'},...o});return r.json();}
+function formatINR(n){if(!n)return'₹0';n=Number(n);if(n>=100000)return'₹'+(n/100000).toFixed(1)+'L';return'₹'+n.toLocaleString('en-IN');}
+function loadSection(s){const m={dashboard:loadDashboard,products:loadProducts,categories:loadCategories,'ai-tools':loadAITools,broadcasts:loadBroadcasts,customers:loadCustomers,settings:loadSettings};if(m[s])m[s]();}
 
-    async function seedData() { await api('/api/seed',{method:'POST'}); toast('Demo data loaded!'); loadDashboard(); }
+// DASHBOARD
+async function loadDashboard(){
+const d=await api('/api/analytics/dashboard');
+document.getElementById('dash-stats').innerHTML=`
+<div class="stat-card purple"><div class="stat-icon">💍</div><div class="stat-label">Total Products</div><div class="stat-value">${d.total_products}</div></div>
+<div class="stat-card pink"><div class="stat-icon">📦</div><div class="stat-label">Uploaded Today</div><div class="stat-value">${d.uploaded_today}</div></div>
+<div class="stat-card gold"><div class="stat-icon">⚠️</div><div class="stat-label">Low Stock</div><div class="stat-value">${d.low_stock}</div></div>
+<div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-label">Inventory Value</div><div class="stat-value">${formatINR(d.total_inventory_value)}</div></div>`;
+const max=Math.max(...d.weekly_activity.map(w=>w.products),1);
+document.getElementById('weekly-chart').innerHTML=d.weekly_activity.map(w=>`<div class="bar-col"><div class="bar" style="height:${Math.max((w.products/max)*60,4)}px;background:linear-gradient(180deg,var(--primary),var(--accent));"></div><div class="bar-label">${w.day}</div></div>`).join('');
+document.getElementById('top-cats').innerHTML=d.top_categories.length?d.top_categories.map(c=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);"><span style="font-size:13px;font-weight:600;">${c.name}</span><span style="font-size:12px;color:var(--primary);font-weight:700;">${c.count}</span></div>`).join(''):'<p style="color:var(--gray-400);font-size:13px;">Load demo data first</p>';
+document.getElementById('recent-broadcasts').innerHTML=d.recent_broadcasts.length?d.recent_broadcasts.map(b=>`<div class="broadcast-card"><div class="platform">${b.platform} • ${b.status}</div><h4>${b.title}</h4></div>`).join(''):'<p style="color:var(--gray-400);font-size:13px;">No broadcasts yet</p>';}
+</script>
 
-    // Init
-    loadDashboard();
-  </script>
-</body>
-</html>
+<script>
+// PRODUCTS
+async function loadProducts(){const cats=await api('/api/categories');document.getElementById('product-cat-filter').innerHTML='<option value="">All</option>'+cats.map(c=>`<option>${c.name}</option>`).join('');searchProducts();}
+async function searchProducts(){const s=document.getElementById('product-search').value,c=document.getElementById('product-cat-filter').value;let u='/api/products?';if(s)u+=`search=${encodeURIComponent(s)}&`;if(c)u+=`category=${encodeURIComponent(c)}&`;allProducts=await api(u);renderProducts();}
+function renderProducts(){const g=document.getElementById('product-grid');if(!allProducts.length){g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--gray-400);"><p style="font-size:48px;">💍</p><p>No products. Add your first!</p></div>';return;}
+g.innerHTML=allProducts.map(p=>{const e=getCategoryEmoji(p.category),low=p.stock<=5,sel=selectedProducts.has(p.id);return`<div class="product-card"><div class="select-check ${sel?'checked':''}" onclick="event.stopPropagation();toggleSelect(${p.id})">${sel?'✓':''}</div><div class="img-wrap">${e}${low?'<div class="stock-badge low">Stock: '+p.stock+'</div>':'<div class="stock-badge">'+p.stock+'</div>'}</div><div class="info"><div class="cat">${p.category||''}</div><div class="name">${p.name}</div><div class="prices"><span class="price-wholesale">₹${p.wholesale_price}</span><span class="price-retail">₹${p.retail_price}</span></div></div><div class="actions-bar"><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();genWA(${p.id})">📱</button><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();genIG(${p.id})">📸</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();delProduct(${p.id})">🗑</button></div></div>`;}).join('');
+document.getElementById('bulk-broadcast-btn').style.display=selectedProducts.size>0?'inline-flex':'none';}
+function toggleSelect(id){selectedProducts.has(id)?selectedProducts.delete(id):selectedProducts.add(id);renderProducts();}
+function getCategoryEmoji(c){const m={'Necklaces':'📿','Earrings':'✨','Bangles':'⭕','Bracelets':'💫','Rings':'💍','Mangalsutra':'🪷','Cosmetics':'💄','Lipsticks':'💋','Foundations':'🧴','Skin Care':'🧖','Hair Care':'💇'};return m[c]||'💎';}
+async function delProduct(id){if(!confirm('Delete?'))return;await api(`/api/products/${id}`,{method:'DELETE'});toast('Deleted');searchProducts();}
+async function genWA(id){const r=await api('/api/broadcasts/generate-whatsapp',{method:'POST',body:JSON.stringify({product_ids:[id]})});showCaption('WhatsApp',r.caption);}
+async function genIG(id){const r=await api('/api/broadcasts/generate-instagram',{method:'POST',body:JSON.stringify({product_ids:[id]})});showCaption('Instagram',r.caption+'\n\n'+r.hashtags);}
+function showCaption(title,text){document.getElementById('modal-content').innerHTML=`<h3>${title} Caption</h3><div class="ai-result"><pre>${text}</pre></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="navigator.clipboard.writeText(\`${text.replace(/`/g,"'").replace(/\\/g,'\\\\')}\`);toast('Copied!')">📋 Copy</button></div>`;document.getElementById('modal').classList.add('show');}
+
+// CATEGORIES
+async function loadCategories(){const cats=await api('/api/categories');document.getElementById('cat-grid').innerHTML=cats.map(c=>`<div class="cat-card" onclick="filterByCat('${c.name}')"><div class="cat-icon">${c.icon}</div><div class="cat-name">${c.name}</div><div class="cat-count">${c.count} products</div></div>`).join('');}
+function filterByCat(n){document.querySelector('[data-section="products"]').click();setTimeout(()=>{document.getElementById('product-cat-filter').value=n;searchProducts();},100);}
+</script>
+
+<script>
+// PRICE CALCULATOR
+function calculatePricing(){const cost=parseFloat(document.getElementById('calc-cost').value)||0;const margin=parseInt(document.getElementById('calc-margin').value);document.getElementById('margin-display').textContent=margin+'%';const sell=Math.round(cost*(1+margin/100));const profit=sell-cost;document.getElementById('calc-selling').textContent='₹'+sell.toLocaleString('en-IN');document.getElementById('calc-profit').textContent='₹'+profit.toLocaleString('en-IN');}
+function calcBulk(){const c=parseFloat(document.getElementById('bulk-cost').value)||0;const q=parseInt(document.getElementById('bulk-qty').value)||0;const s=parseFloat(document.getElementById('bulk-sell').value)||0;const invest=c*q,revenue=s*q,profit=revenue-invest;const roi=invest>0?((profit/invest)*100).toFixed(0):0;document.getElementById('bulk-invest').textContent='₹'+invest.toLocaleString('en-IN');document.getElementById('bulk-profit').textContent='₹'+profit.toLocaleString('en-IN');document.getElementById('bulk-roi').textContent=roi+'%';}
+function calcMRP(){const mrp=parseFloat(document.getElementById('mrp-price').value)||0;const cost=parseFloat(document.getElementById('mrp-cost').value)||0;const profit=mrp-cost;const margin=cost>0?((profit/cost)*100).toFixed(0):0;document.getElementById('mrp-margin').textContent=margin+'%';document.getElementById('mrp-profit').textContent='₹'+profit.toLocaleString('en-IN');const v=document.getElementById('mrp-verdict');if(margin>=100)v.innerHTML='<span style="color:var(--success);">🔥 Excellent margin! Strong product.</span>';else if(margin>=50)v.innerHTML='<span style="color:var(--primary);">👍 Good margin. Worth stocking.</span>';else if(margin>=25)v.innerHTML='<span style="color:var(--warning);">⚠️ Thin margin. Consider bulk discounts.</span>';else v.innerHTML='<span style="color:var(--danger);">❌ Very low margin. Renegotiate or skip.</span>';}
+
+// AI TOOLS
+async function loadAITools(){const products=await api('/api/products');const opts=products.map(p=>`<option value="${p.id}">${p.name} (₹${p.wholesale_price})</option>`).join('');['ai-wa-product','ai-ig-product','ai-desc-product'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});}
+async function aiWhatsApp(){const id=document.getElementById('ai-wa-product').value;const r=await api('/api/broadcasts/generate-whatsapp',{method:'POST',body:JSON.stringify({product_ids:[parseInt(id)]})});document.getElementById('ai-wa-result').innerHTML=`<div class="ai-result"><pre>${r.caption}</pre></div><button class="btn btn-sm btn-primary" style="margin-top:8px;" onclick="navigator.clipboard.writeText(document.querySelector('#ai-wa-result pre').textContent);toast('Copied!')">📋 Copy</button>`;}
+async function aiInstagram(){const id=document.getElementById('ai-ig-product').value;const style=document.getElementById('ai-ig-style').value;const r=await api('/api/broadcasts/generate-instagram',{method:'POST',body:JSON.stringify({product_ids:[parseInt(id)],style})});document.getElementById('ai-ig-result').innerHTML=`<div class="ai-result"><pre>${r.caption}\n\n${r.hashtags}</pre></div><button class="btn btn-sm btn-primary" style="margin-top:8px;" onclick="navigator.clipboard.writeText(document.querySelector('#ai-ig-result pre').textContent);toast('Copied!')">📋 Copy</button>`;}
+async function aiDescription(){const id=document.getElementById('ai-desc-product').value;const style=document.getElementById('ai-desc-style').value;const r=await api('/api/broadcasts/generate-description',{method:'POST',body:JSON.stringify({product_id:parseInt(id),style})});document.getElementById('ai-desc-result').innerHTML=`<div class="ai-result"><pre>${r.description}</pre></div><button class="btn btn-sm btn-primary" style="margin-top:8px;" onclick="navigator.clipboard.writeText(document.querySelector('#ai-desc-result pre').textContent);toast('Copied!')">📋 Copy</button>`;}
+async function aiPrice(){const wp=document.getElementById('ai-price-wp').value;const cat=document.getElementById('ai-price-cat').value;const r=await api('/api/broadcasts/suggest-price',{method:'POST',body:JSON.stringify({wholesale_price:wp,category:cat})});document.getElementById('ai-price-result').innerHTML=`<div class="ai-result"><p><strong>Suggested Retail:</strong> ₹${r.suggested_retail}</p><p><strong>Markup:</strong> ${r.markup_percent}%</p><p><strong>Category Avg:</strong> ₹${r.category_avg||'N/A'}</p></div>`;}
+function aiHashtags(){const cat=document.getElementById('ai-hash-cat').value;const tags={'Necklaces':'#necklace #necklaceset #jewellery #goldnecklace #fashionnecklace #imitationjewellery #wholesale #trending #indianjewellery #neckpiece #choker #traditionalwear #bridaljewellery #mangalsutra #accessories','Earrings':'#earrings #jhumkas #studs #earringsofinstagram #fashionearrings #jhumkalove #oxidizedearrings #danglers #chandbali #indianearrings #traditionalearrings #partyearrings #wholesale #trending #imitationjewellery','Bangles':'#bangles #bangleset #indianbangles #banglelove #silkthreadbangles #lacbangles #glassbangles #goldplatedbangles #festivebangles #wholesalebangles #banglestack #banglesofinstagram #trendy #fashion #accessories','Cosmetics':'#cosmetics #beauty #makeup #skincare #beautyblogger #makeuplover #beautytips #makeuptutorial #skincareroutine #beautyproducts #wholesale #trending #indianbeauty #affordablemakeup #drugstoremakeup','Lipsticks':'#lipstick #matte #lipliner #lipcolor #lipstickaddict #mattelipstick #liquidlipstick #nuelips #boldlips #lipstickshades #wholesale #trending #affordablelipstick #indianmakeup #beautylover'};const h=tags[cat]||'#jewellery #fashion #wholesale #trending #accessories #shopnow #newcollection #indianfashion #handmade #traditional #modern #premium #quality #bestseller #musthave';document.getElementById('ai-hash-result').innerHTML=`<div class="ai-result"><pre>${h}</pre></div><button class="btn btn-sm btn-primary" style="margin-top:8px;" onclick="navigator.clipboard.writeText('${h}');toast('Copied!')">📋 Copy All</button>`;}
+function aiCompare(){const price=parseFloat(document.getElementById('ai-comp-price').value)||0;const cat=document.getElementById('ai-comp-cat').value;const avgs={'Necklaces':799,'Earrings':349,'Bangles':499,'Bracelets':399,'Rings':249,'Mangalsutra':899,'Cosmetics':399,'Lipsticks':249};const avg=avgs[cat]||499;const diff=((price-avg)/avg*100).toFixed(0);let verdict='';if(diff>20)verdict='<span style="color:var(--danger);">⚠️ Priced '+diff+'% above market average. May lose price-sensitive buyers.</span>';else if(diff>0)verdict='<span style="color:var(--warning);">Slightly above average (+'+diff+'%). Premium positioning.</span>';else if(diff>-20)verdict='<span style="color:var(--success);">✓ Competitive pricing ('+diff+'% vs market). Good position.</span>';else verdict='<span style="color:var(--primary);">💰 Significantly below market ('+diff+'%). Great for volume sales.</span>';document.getElementById('ai-comp-result').innerHTML=`<div class="ai-result"><p><strong>Market Avg (${cat}):</strong> ₹${avg}</p><p><strong>Your Price:</strong> ₹${price}</p><p><strong>Difference:</strong> ${diff}%</p><p style="margin-top:8px;">${verdict}</p></div>`;}
+</script>
+
+<script>
+// BROADCASTS
+async function loadBroadcasts(){const b=await api('/api/broadcasts');document.getElementById('broadcast-history').innerHTML=b.length?b.map(x=>`<div class="broadcast-card"><div class="platform">${x.platform} • ${x.status}</div><h4>${x.title}</h4></div>`).join(''):'<div style="text-align:center;padding:40px;color:var(--gray-400);">No broadcasts yet</div>';}
+function showBroadcastCreator(){document.getElementById('broadcast-creator').style.display='block';loadBCProducts();}
+async function loadBCProducts(){const p=await api('/api/products');document.getElementById('broadcast-product-select').innerHTML=p.map(x=>`<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;cursor:pointer;"><input type="checkbox" class="bc-prod" value="${x.id}" ${selectedProducts.has(x.id)?'checked':''}>${x.name} <span style="color:var(--gray-400);">₹${x.wholesale_price}</span></label>`).join('');}
+async function generateBroadcast(){const ids=Array.from(document.querySelectorAll('.bc-prod:checked')).map(c=>parseInt(c.value));if(!ids.length){toast('Select products');return;}const platform=document.getElementById('bc-platform').value;const style=document.getElementById('bc-style').value;const ep=platform==='whatsapp'?'/api/broadcasts/generate-whatsapp':'/api/broadcasts/generate-instagram';const r=await api(ep,{method:'POST',body:JSON.stringify({product_ids:ids,tone:style,style})});const cap=r.caption+(r.hashtags?'\n\n'+r.hashtags:'');document.getElementById('broadcast-result').innerHTML=`<div class="ai-result"><pre>${cap}</pre></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.querySelector('#broadcast-result pre').textContent);toast('Copied!')">📋 Copy</button><button class="btn btn-success" onclick="saveBroadcast('${platform}')">💾 Save</button></div>`;toast('Generated!');}
+async function saveBroadcast(p){await api('/api/broadcasts',{method:'POST',body:JSON.stringify({title:'Broadcast - '+new Date().toLocaleDateString(),platform:p,product_ids:Array.from(selectedProducts)})});toast('Saved!');loadBroadcasts();}
+function bulkBroadcast(){document.querySelector('[data-section="broadcasts"]').click();setTimeout(showBroadcastCreator,200);}
+
+// CUSTOMERS
+async function loadCustomers(){const c=await api('/api/customers');document.getElementById('customer-table').innerHTML=c.map(x=>`<tr><td style="padding:12px;font-weight:600;font-size:13px;">${x.name}</td><td style="padding:12px;font-size:13px;">${x.city||'-'}</td><td style="padding:12px;"><span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${x.type==='wholesaler'?'var(--primary-light)':'var(--gold-light)'};color:${x.type==='wholesaler'?'var(--primary)':'var(--gold)'};">${x.type}</span></td><td style="padding:12px;font-size:13px;">${x.total_orders||0}</td><td style="padding:12px;font-weight:700;color:var(--success);">${formatINR(x.total_value)}</td></tr>`).join('');}
+
+// SETTINGS
+async function loadSettings(){const s=await api('/api/settings');document.getElementById('s-name').value=s.business_name||'';document.getElementById('s-phone').value=s.phone||'';document.getElementById('s-whatsapp').value=s.whatsapp||'';document.getElementById('s-instagram').value=s.instagram||'';}
+async function saveSettings(){await api('/api/settings',{method:'PATCH',body:JSON.stringify({business_name:document.getElementById('s-name').value,phone:document.getElementById('s-phone').value,whatsapp:document.getElementById('s-whatsapp').value,instagram:document.getElementById('s-instagram').value})});toast('Saved!');}
+
+// MODALS
+function showModal(type){const cats=['Necklaces','Earrings','Bangles','Bracelets','Rings','Mangalsutra','Cosmetics','Lipsticks','Foundations','Skin Care','Hair Care'];const forms={
+product:`<h3>Add Product</h3><div class="form-group"><label>Name *</label><input id="f-name" placeholder="e.g. Kundan Necklace Set"></div><div class="form-row"><div class="form-group"><label>Category</label><select id="f-category">${cats.map(c=>'<option>'+c+'</option>').join('')}</select></div><div class="form-group"><label>SKU</label><input id="f-sku" placeholder="Auto"></div></div><div class="form-row"><div class="form-group"><label>Wholesale ₹</label><input id="f-wprice" type="number" placeholder="450"></div><div class="form-group"><label>Retail ₹</label><input id="f-rprice" type="number" placeholder="999"></div></div><div class="form-row"><div class="form-group"><label>Stock</label><input id="f-stock" type="number" value="10"></div><div class="form-group"><label>Material</label><input id="f-material" placeholder="e.g. Alloy"></div></div><div class="form-row"><div class="form-group"><label>Color</label><input id="f-color" placeholder="Gold/White"></div><div class="form-group"><label>Weight</label><input id="f-weight" placeholder="85g"></div></div><div class="form-group"><label>Tags</label><input id="f-tags" placeholder="kundan, bridal, pearl"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitProduct()">Add</button></div>`,
+category:`<h3>Add Category</h3><div class="form-group"><label>Name</label><input id="f-cat-name"></div><div class="form-group"><label>Icon</label><input id="f-cat-icon" placeholder="💍"></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitCat()">Add</button></div>`,
+customer:`<h3>Add Customer</h3><div class="form-row"><div class="form-group"><label>Name</label><input id="f-cust-name"></div><div class="form-group"><label>Phone</label><input id="f-cust-phone" placeholder="+91-"></div></div><div class="form-row"><div class="form-group"><label>City</label><input id="f-cust-city" placeholder="Meerut"></div><div class="form-group"><label>Type</label><select id="f-cust-type"><option>retailer</option><option>wholesaler</option></select></div></div><div class="form-actions"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitCust()">Add</button></div>`};
+document.getElementById('modal-content').innerHTML=forms[type]||'';document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+async function submitProduct(){const n=document.getElementById('f-name').value;if(!n){toast('Name required');return;}const wp=parseFloat(document.getElementById('f-wprice').value)||0;await api('/api/products',{method:'POST',body:JSON.stringify({name:n,category:document.getElementById('f-category').value,sku:document.getElementById('f-sku').value,wholesale_price:wp,retail_price:parseFloat(document.getElementById('f-rprice').value)||Math.round(wp*2.2),stock:parseInt(document.getElementById('f-stock').value)||0,material:document.getElementById('f-material').value,color:document.getElementById('f-color').value,weight:document.getElementById('f-weight').value,tags:document.getElementById('f-tags').value})});closeModal();toast('Added!');searchProducts();}
+async function submitCat(){await api('/api/categories',{method:'POST',body:JSON.stringify({name:document.getElementById('f-cat-name').value,icon:document.getElementById('f-cat-icon').value||'📦'})});closeModal();toast('Added!');loadCategories();}
+async function submitCust(){await api('/api/customers',{method:'POST',body:JSON.stringify({name:document.getElementById('f-cust-name').value,phone:document.getElementById('f-cust-phone').value,city:document.getElementById('f-cust-city').value,type:document.getElementById('f-cust-type').value})});closeModal();toast('Added!');loadCustomers();}
+async function seedData(){await api('/api/seed',{method:'POST'});toast('Demo loaded!');loadDashboard();}
+</script>
+</body></html>
